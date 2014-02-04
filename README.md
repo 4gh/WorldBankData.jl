@@ -12,7 +12,7 @@ The module follows roughly the
 ## Installation
 
 ```julia
-julia> Pkg.clone("git://example.com/path/to/Package.jl.git")
+julia> Pkg.clone("git://github.com/4gh/WDI.jl.git")
 ```
 
 ## Basic Examples
