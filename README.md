@@ -1,5 +1,5 @@
-Working with World Bank Data in Julia
-=====================================
+World Bank Data in Julia
+========================
 
 The World Bank provides free access to data about development at
 [data.worldbank.org](http://data.worldbank.org).
