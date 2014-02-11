@@ -139,7 +139,7 @@ insensitive.
 "indicators" can be searched for "name", "description", "topics",
 "source_database", and "source_organization".
 
-### Examples of other countries searches
+### Examples of country searches
 
 ```julia
 julia> search_wdi("countries","iso2c",r"TZ"i)
@@ -168,7 +168,7 @@ julia> search_wdi("countries","lending",r"IBRD"i)
 
 ```
 
-### Examples of other indicator searches
+### Examples of indicator searches
 
 ```julia
 julia> search_wdi("indicators","name",r"gross national expenditure"i)
