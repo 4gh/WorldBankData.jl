@@ -1,7 +1,7 @@
 module TestParseWDI
 
 using Base.Test
-using WDI
+using WorldBankData
 
 us_gnp_data = {  { "total"=>23,"per_page"=>"25000","pages"=>1,"page"=>1 },
                  { ["date"=>"2012","value"=>"52340","indicator"=>["id"=>"NY.GNP.PCAP.CD","value"=>"GNI per capita, Atlas method (current US\$)"],"country"=>["id"=>"US","value"=>"United States"],"decimal"=>"0"],
@@ -14,7 +14,7 @@ us_gnp_data = {  { "total"=>23,"per_page"=>"25000","pages"=>1,"page"=>1 },
                  }
               }
 
-us_gnp = WDI.parse_wdi("NY.GNP.PCAP.CD",us_gnp_data[2],2006,2012)
+us_gnp = WorldBankData.parse_wdi("NY.GNP.PCAP.CD",us_gnp_data[2],2006,2012)
 
 @test us_gnp["year"] == Float64[2012, 2011, 2010, 2009, 2008, 2007, 2006]
 @test us_gnp["NY.GNP.PCAP.CD"] == Float64[52340, 50650, 48960, 48040, 49350, 48640, 48080]

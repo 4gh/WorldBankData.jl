@@ -1,7 +1,7 @@
 module TestWDICountries
 
 using Base.Test
-using WDI
+using WorldBankData
 
 country_data = { { "total"=>4,"per_page"=>"25000","pages"=>1,"page"=>1 },
                  {
@@ -11,7 +11,7 @@ country_data = { { "total"=>4,"per_page"=>"25000","pages"=>1,"page"=>1 },
                     ["latitude"=>"-34.6118","id"=>"ARG","iso2Code"=>"AR","incomeLevel"=>["id"=>"UMC","value"=>"Upper middle income"],"adminregion"=>["id"=>"LAC","value"=>"Latin America & Caribbean (developing only)"],"lendingType"=>["id"=>"IBD","value"=>"IBRD"],"region"=>["id"=>"LCN","value"=>"Latin America & Caribbean (all income levels)"],"capitalCity"=>"Buenos Aires","name"=>"Argentina","longitude"=>"-58.4173"]
                  }
                }
-df_country = WDI.parse_country(country_data)
+df_country = WorldBankData.parse_country(country_data)
 
 @test df_country["name"] == UTF8String["Andorra", "Arab World", "United Arab Emirates", "Argentina"]
 @test df_country["iso2c"] == ASCIIString["AD", "1A", "AE", "AR"]

@@ -1,7 +1,7 @@
 module TestWDISearchWDI
 
 using Base.Test
-using WDI
+using WorldBankData
 
 country_data = { { "total"=>4,"per_page"=>"25000","pages"=>1,"page"=>1 },
                  {
@@ -11,7 +11,7 @@ country_data = { { "total"=>4,"per_page"=>"25000","pages"=>1,"page"=>1 },
                     ["latitude"=>"-34.6118","id"=>"ARG","iso2Code"=>"AR","incomeLevel"=>["id"=>"UMC","value"=>"Upper middle income"],"adminregion"=>["id"=>"LAC","value"=>"Latin America & Caribbean (developing only)"],"lendingType"=>["id"=>"IBD","value"=>"IBRD"],"region"=>["id"=>"LCN","value"=>"Latin America & Caribbean (all income levels)"],"capitalCity"=>"Buenos Aires","name"=>"Argentina","longitude"=>"-58.4173"]
                  }
                }
-df_country = WDI.parse_country(country_data)
+df_country = WorldBankData.parse_country(country_data)
 
 indicator_data = { { "total"=>5,"per_page"=>"25000","pages"=>1,"page"=>1 },
                    { ["sourceOrganization"=>"World Bank and International Energy Agency (IEA Statistics © OECD/IEA, http://www.iea.org/stats/index.asp).  ","id"=>"12.1_TD.LOSSES","topics"=>{},"sourceNote"=>"Transmission and distribution losses (%): Transmission and distribution (T&D) losses measure power lost in the transmission of (high-voltage) electricity from power generators to distributors and in the distribution of (medium- and low-voltage) electricity from distributors to end-users. T&D losses are represented as a percentage of gross electricity production. They include both technical and nontechnical (or commercial) losses. Included in the latter are unmetered, unbilled, and unpaid electricity, including theft, which could be significant in developing countries. Aggregate T&D system indicators may be dominated by factors other than losses. The location of primary energy resources (such as hydro lakes and coal seams) and large loads (cities and industries) may be more significant factors in T&D efficiency indicators than the losses or efficiency of the transmission system itself. Properly separating true losses (and hence the efficiency potential of transmission systems) from exogenous location and scale factors and nontechnical losses would require detailed studies of system-dynamic interactions and real operating requirements that are not practical for global tracking purposes.","name"=>"Transmission and distribution losses (%)","source"=>["id"=>"35","value"=>"Sustainable Energy for All"]],
@@ -22,14 +22,14 @@ indicator_data = { { "total"=>5,"per_page"=>"25000","pages"=>1,"page"=>1 },
                    }
                  }
 
-df_indicator = WDI.parse_indicator(indicator_data)
+df_indicator = WorldBankData.parse_indicator(indicator_data)
 
-WDI.set_country_cache(df_country)
+WorldBankData.set_country_cache(df_country)
 
 @test search_wdi("countries","name",r"(Andorr|Arg)"i)["capital"] ==  UTF8String["Andorra la Vella", "Buenos Aires"]
 @test search_wdi("countries","capital",r"(Andorr|Abu)"i)["iso2c"] ==  ASCIIString["AD", "AE"]
 
-WDI.set_indicator_cache(df_indicator)
+WorldBankData.set_indicator_cache(df_indicator)
 
 @test search_wdi("indicators","description",r"energy intensity of"i)["name"] == UTF8String["Energy intensity of industrial sector (MJ/\$2005)", "Energy intensity of agricultural sector (MJ/\$2005)", "Energy intensity of other sectors (MJ/\$2005)"]
 @test search_wdi("indicators","description",r"transmiss"i)["indicator"] == ASCIIString["12.1_TD.LOSSES"]

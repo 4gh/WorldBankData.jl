@@ -1,4 +1,4 @@
-module WDI
+module WorldBankData
 
 using HTTPClient.HTTPC
 using JSON

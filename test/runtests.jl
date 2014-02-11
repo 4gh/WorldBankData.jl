@@ -1,5 +1,5 @@
 using Base.Test
-using WDI
+using WorldBankData
 
 my_tests = ["countries.jl", "indicators.jl", "wdi.jl", "search_wdi.jl"] 
 
