@@ -28,6 +28,16 @@ using WorldBankData
 df=wdi("NY.GNP.PCAP.CD", ["US","BR"])
 ```
 
+The WDI indicator `NY.GNP.PCAP.CD` becomes the symbol `NY_GNP_PCAP_CD` in the DataFrame. For
+example:
+```julia
+using WorldBankData
+using Winston
+
+df=wdi("NY.GNP.PCAP.CD", ["US","BR"])
+plot(df[df[:iso2c] .== "US",:][:year], df[df[:iso2c] .== "US",:][:NY_GNP_PCAP_CD])
+```
+
 ### Multiple countries and indicators
 
 ```julia
@@ -93,7 +103,7 @@ julia> res=search_wdi("indicators","description",r"gross national expenditure"i)
 | 4     | source_database     | UTF8String | 0       |
 | 5     | source_organization | UTF8String | 0       |
 
-julia> res["name"]
+julia> res[:name]
 6-element DataArray{UTF8String,1}:
  "Gross national expenditure deflator (base year varies by country)"
  "Gross national expenditure (current US\$)"
@@ -102,7 +112,7 @@ julia> res["name"]
  "Gross national expenditure (constant LCU)"
  "Gross national expenditure (% of GDP)"
 
-julia> res["indicator"]
+julia> res[:indicator]
 6-element DataArray{UTF8String,1}:
  "NE.DAB.DEFL.ZS"
  "NE.DAB.TOTL.CD"
@@ -187,9 +197,22 @@ julia> search_wdi("indicators","source_organization",r"Global Partnership"i)
 
 ```julia
 df=wdi("NY.GNP.PCAP.CD", ["US","BR"], 1980, 2012, true)
-indx=map(x-> x=="US", df["iso2c"])
-indx=convert(DataArray{Bool,1}, indx)
-us_gnp=df[indx,:]
+us_gnp=df[df[:iso2c] .== "US",:]
+```
+
+### Year format
+
+For similarity with the
+[R WDI package](http://cran.r-project.org/web/packages/WDI/index.html) the `:year`
+column is in Float64 format. WDI data is yearly.
+
+You can easily convert this to a Date series:
+```julia
+using WorldBankData
+using Dates
+
+df=wdi("AG.LND.ARBL.HA.PC", "US", 1900, 2011)
+df[:year] = map(Date, df[:year])
 ```
 
 ### Plotting
@@ -200,7 +223,7 @@ using Winston
 
 df=wdi("AG.LND.ARBL.HA.PC", "US", 1900, 2011)
 
-plot(df["year"], df["AG.LND.ARBL.HA.PC"])
+plot(df[:year], df[:AG.LND.ARBL.HA.PC])
 ```
 
 ### Empty/Missing results
@@ -208,19 +231,15 @@ plot(df["year"], df["AG.LND.ARBL.HA.PC"])
 `wdi` will return an empty DataFrame without warning if there is no data:
 ```julia
 julia> dfAS=wdi("EN.ATM.CO2E.KT", "AS")
-download:
-http://api.worldbank.org/countries/AS/indicators/EN.ATM.CO2E.KT?date=1800:3000&per_page=25000&format=json
 0x4 DataFrame
 ```
+
+You can check for this with `size(dfAS)[1]==0`.
 
 It will return a DataFrame for the cases where it has data, i.e.
 
 ```julia
 julia> df=wdi("EN.ATM.CO2E.KT", ["AS","US"])
-download:
-http://api.worldbank.org/countries/AS/indicators/EN.ATM.CO2E.KT?date=1800:3000&per_page=25000&format=json
-download:
-http://api.worldbank.org/countries/US/indicators/EN.ATM.CO2E.KT?date=1800:3000&per_page=25000&format=json
 51x4 DataFrame
 ...
 ```
@@ -260,6 +279,9 @@ WorldBankData.set_indicator_cache(readtable("indicator_cache.csv"))
 
 From then on the `search_wdi()` function will use the data read from
 disk.
+
+The caches can be reset with `WorldBankData.reset_country_cache()`
+and `WorldBankData.reset_indicator_cache()`.
 
 #### Indicator data
 

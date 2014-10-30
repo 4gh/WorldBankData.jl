@@ -8,8 +8,10 @@ using DataFrames
 export wdi, search_wdi
 
 
-function download_parse_json(url::ASCIIString)
-    println("download: ",url)
+function download_parse_json(url::ASCIIString, verbose::Bool = false)
+    if verbose
+        println("download: ",url)
+    end
     request = HTTPC.get(url)
     if request.http_code != 200
         error("download failed")
@@ -18,23 +20,23 @@ function download_parse_json(url::ASCIIString)
 end
 
 function parse_indicator(json::Array{Any,1})
-    indicator = ASCIIString[]
-    name = UTF8String[]
-    description = UTF8String[]
-    source_database = UTF8String[]
-    source_organization = UTF8String[]
+    indicator_val = ASCIIString[]
+    name_val = UTF8String[]
+    description_val = UTF8String[]
+    source_database_val = UTF8String[]
+    source_organization_val = UTF8String[]
 
     for d in json[2]
-        append!(indicator,[d["id"]])
-        append!(name,[d["name"]])
-        append!(description,[d["sourceNote"]])
-        append!(source_database, [d["source"]["value"]])
-        append!(source_organization, [d["sourceOrganization"]])
+        append!(indicator_val,[d["id"]])
+        append!(name_val,[d["name"]])
+        append!(description_val,[d["sourceNote"]])
+        append!(source_database_val, [d["source"]["value"]])
+        append!(source_organization_val, [d["sourceOrganization"]])
     end
 
-    DataFrame({"indicator" => indicator, "name" => name,
-               "description" => description, "source_database" => source_database,
-               "source_organization" => source_organization})
+    DataFrame(indicator = indicator_val, name = name_val,
+              description = description_val, source_database = source_database_val,
+              source_organization = source_organization_val)
 end
 
 function tofloat(f::String)
@@ -46,34 +48,34 @@ function tofloat(f::String)
 end
 
 function parse_country(json::Array{Any,1})
-    iso3c = ASCIIString[]
-    iso2c = ASCIIString[]
-    name = UTF8String[]
-    region = UTF8String[]
-    capital = UTF8String[]
-    longitude = UTF8String[]
-    latitude = UTF8String[]
-    income = UTF8String[]
-    lending = UTF8String[]
+    iso3c_val = ASCIIString[]
+    iso2c_val = ASCIIString[]
+    name_val = UTF8String[]
+    region_val = UTF8String[]
+    capital_val = UTF8String[]
+    longitude_val = UTF8String[]
+    latitude_val = UTF8String[]
+    income_val = UTF8String[]
+    lending_val = UTF8String[]
 
     for d in json[2]
-        append!(iso3c,[d["id"]])
-        append!(iso2c,[d["iso2Code"]])
-        append!(name,[d["name"]])
-        append!(region,[d["region"]["value"]])
-        append!(capital,[d["capitalCity"]])
-        append!(longitude,[d["longitude"]])
-        append!(latitude,[d["latitude"]])
-        append!(income,[d["incomeLevel"]["value"]])
-        append!(lending,[d["lendingType"]["value"]])
+        append!(iso3c_val,[d["id"]])
+        append!(iso2c_val,[d["iso2Code"]])
+        append!(name_val,[d["name"]])
+        append!(region_val,[d["region"]["value"]])
+        append!(capital_val,[d["capitalCity"]])
+        append!(longitude_val,[d["longitude"]])
+        append!(latitude_val,[d["latitude"]])
+        append!(income_val,[d["incomeLevel"]["value"]])
+        append!(lending_val,[d["lendingType"]["value"]])
     end
 
-    longitude = [tofloat(i) for i in longitude]
-    latitude = [tofloat(i) for i in latitude]
+    longitude_val = convert_a2f(longitude_val)
+    latitude_val = convert_a2f(latitude_val)
 
-    DataFrame({ "iso3c" => iso3c, "iso2c" => iso2c, "name" => name,
-                "region" => region, "capital" => capital, "longitude" => longitude,
-                "latitude" => latitude, "income" => income, "lending" => lending })
+    DataFrame(iso3c = iso3c_val, iso2c = iso2c_val, name = name_val,
+              region = region_val, capital = capital_val, longitude = longitude_val,
+              latitude = latitude_val, income = income_val, lending = lending_val)
 end
 
 function download_indicators()
@@ -91,10 +93,18 @@ end
 country_cache = false
 indicator_cache = false
 
+function reset_country_cache()
+    global country_cache = false
+end
+
+function reset_indicator_cache()
+    global indicator_cache = false
+end
+
 function set_country_cache(df::AbstractDataFrame)
     global country_cache = df
-    if any(isna(country_cache["iso2c"])) # the iso2c code for North Africa is NA
-        country_cache["iso2c"][convert(DataArray{Bool,1}, isna(country_cache["iso2c"]))]="NA"
+    if any(isna(country_cache[:iso2c])) # the iso2c code for North Africa is NA
+        country_cache[:iso2c][convert(DataArray{Bool,1}, isna(country_cache[:iso2c]))]="NA"
     end
 end
 
@@ -117,7 +127,7 @@ function get_indicators()
 end
 
 regex_match(df::DataArray{UTF8String,1},regex::Regex) = convert(DataArray{Bool, 1}, map(x -> ismatch(regex,x), df))
-df_match(df::AbstractDataFrame,entry::ASCIIString,regex::Regex) = df[regex_match(df[entry],regex),:]
+df_match(df::AbstractDataFrame,entry::ASCIIString,regex::Regex) = df[regex_match(df[make_symbol(entry)],regex),:]
 
 function country_match(entry::ASCIIString,regex::Regex)
     df = get_countries()
@@ -174,6 +184,21 @@ function clean_append!(vals::Union(Array{UTF8String,1},Array{ASCIIString,1}),val
     append!(vals,[clean_entry(val)])
 end
 
+# The "." character is illegal in symbol, but used a lot in WDI. replace by "_".
+# example: NY.GNP.PCAP.CD becomes NY_GNP_PCAP_CD
+function make_symbol(x::ASCIIString)
+    symbol(replace(x, ".", "_"))
+end
+
+function convert_a2f(x::Union(Array{ASCIIString,1},Array{UTF8String,1}))
+    n = length(x)
+    arr = @data(zeros(n))
+    for i in 1:n
+        arr[i]=tofloat(x[i])
+    end
+    arr
+end
+
 function parse_wdi(indicator::ASCIIString, json, startyear::Integer, endyear::Integer)
     country_id = ASCIIString[]
     country_name = UTF8String[]
@@ -187,18 +212,18 @@ function parse_wdi(indicator::ASCIIString, json, startyear::Integer, endyear::In
         clean_append!(date,d["date"])
     end
 
-    value = float64(DataArray(Any[tofloat(i) for i in value]))
-    date = float64(DataArray(Any[tofloat(i) for i in date]))
+    value = convert_a2f(value)
+    date = convert_a2f(date)
 
-    df = DataFrame({ "iso2c" => country_id, "country" => country_name })
-    df[string(indicator)] = value
-    df["year"] = date
+    df = DataFrame(iso2c = country_id, country = country_name)
+    df[make_symbol(indicator)] = value
+    df[:year] = date
 
     # filter missing/wrong data
     complete_cases!(df)
 
     checkyear(x) = (x >= startyear) & (x <= endyear)
-    yind = map(checkyear,df["year"])
+    yind = map(checkyear,df[:year])
     yind = convert(DataArray{Bool, 1}, yind)
     df[yind, :]
 end
@@ -256,8 +281,8 @@ function wdi(indicators::Union(ASCIIString,Array{ASCIIString,1}),countries::Unio
     end
 
     if extra
-        cntdat = getCountries()
-        df = join(df,cntdat)
+        cntdat = get_countries()
+        df = join(df,cntdat,on=:iso2c)
     end
 
     df
