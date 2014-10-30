@@ -78,12 +78,12 @@ One can search for "countries" or "indicators" data.
 
 ```julia
 julia> res=search_wdi("countries","name",r"united"i)
-julia> res["name"]
+julia> res[:name]
 3-element DataArray{UTF8String,1}:
  "United Arab Emirates"
  "United Kingdom"
  "United States"
-julia> res["iso2c"]
+julia> res[:iso2c]
 3-element DataArray{ASCIIString,1}:
  "AE"
  "GB"
