@@ -15,7 +15,7 @@ It follows roughly the
 ## Installation
 
 ```julia
-julia> Pkg.clone("git://github.com/4gh/WorldBankData.jl.git")
+julia> Pkg.add("WorldBankData")
 ```
 
 ## Basic Examples
