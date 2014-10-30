@@ -1,6 +1,6 @@
 language: cpp
 compiler:
-  - clang
+  - gcc
 notifications:
   email: false
 env:
@@ -12,7 +12,10 @@ before_install:
   - sudo add-apt-repository ppa:staticfloat/${JULIAVERSION} -y
   - sudo apt-get update -qq -y
   - sudo apt-get install libpcre3-dev julia -y
+  - git config --global user.name "Travis User"
+  - git config --global user.email "travis@example.net"
+  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 script:
-  - julia -e 'Pkg.init(); run(`ln -s $(pwd()) $(Pkg.dir("WorldBankData"))`); Pkg.pin("WorldBankData"); Pkg.resolve()'
+  - julia -e 'versioninfo(); Pkg.init(); Pkg.clone(pwd()); Pkg.checkout("WorldBankData");'
   - julia ./test/runtests.jl 
 
