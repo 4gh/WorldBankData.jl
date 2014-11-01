@@ -9,7 +9,7 @@ using DataFrames
 WorldBankData.reset_country_cache()
 WorldBankData.reset_indicator_cache()
 
-refdf = readtable("test/example_data.csv")
+refdf = readtable(joinpath(dirname(@__FILE__),"example_data.csv"))
 
 # download example case from documentation and compare to csv file
 # retry 5 times if no data
