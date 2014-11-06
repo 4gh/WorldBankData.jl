@@ -2,3 +2,4 @@ HTTPClient
 JSON
 DataArrays
 DataFrames
+Compat
