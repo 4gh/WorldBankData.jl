@@ -238,7 +238,7 @@ function wdi_download(indicator::ASCIIString, country::Union(ASCIIString,Array{A
         for c in country
             url = string("http://api.worldbank.org/countries/", c, "/indicators/", indicator,
                          "?date=", startyear,":", endyear, "&per_page=25000", "&format=json")
-            append!(json,[download_parse_json(url)[2]])
+            append!(json,[download_parse_json(url)[2];])
         end
     end
 
