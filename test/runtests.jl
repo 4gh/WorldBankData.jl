@@ -1,7 +1,11 @@
 using Base.Test
 using WorldBankData
 
-my_tests = ["countries.jl", "indicators.jl", "wdi.jl", "search_wdi.jl", "example_dl.jl"] 
+# example_dl.jl test downloads test data from web site.
+# The data gets revised occasionally which breaks the test.
+# my_tests = ["countries.jl", "indicators.jl", "wdi.jl", "search_wdi.jl", "example_dl.jl"]
+
+my_tests = ["countries.jl", "indicators.jl", "wdi.jl", "search_wdi.jl"]
 
 println("Running tests:")
 
