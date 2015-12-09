@@ -4,6 +4,7 @@ using HTTPClient.HTTPC
 using JSON
 using DataArrays
 using DataFrames
+using Compat
 
 export wdi, search_wdi
 
@@ -39,7 +40,7 @@ function parse_indicator(json::Array{Any,1})
               source_organization = source_organization_val)
 end
 
-function tofloat(f::String)
+function tofloat(f::AbstractString)
      try
          return float(f)
      catch
@@ -172,15 +173,15 @@ function search_wdi(data::ASCIIString,entry::ASCIIString,regx::Regex)
     end
 end
 
-function clean_entry(x::Union(String,Nothing))
-    if typeof(x) == Nothing
+@compat function clean_entry(x::Union{AbstractString,Void})
+    if @compat(typeof(x) == Void)
         return "NA"
     else
         return x
     end
 end
 
-function clean_append!(vals::Union(Array{UTF8String,1},Array{ASCIIString,1}),val::Union(UTF8String,ASCIIString,Nothing))
+@compat function clean_append!(vals::Union{Array{UTF8String,1},Array{ASCIIString,1}},val::Union{UTF8String,ASCIIString,Void})
     append!(vals,[clean_entry(val)])
 end
 
@@ -190,7 +191,7 @@ function make_symbol(x::ASCIIString)
     symbol(replace(x, ".", "_"))
 end
 
-function convert_a2f(x::Union(Array{ASCIIString,1},Array{UTF8String,1}))
+@compat function convert_a2f(x::Union{Array{ASCIIString,1},Array{UTF8String,1}})
     n = length(x)
     arr = @data(zeros(n))
     for i in 1:n
@@ -228,7 +229,7 @@ function parse_wdi(indicator::ASCIIString, json, startyear::Integer, endyear::In
     df[yind, :]
 end
 
-function wdi_download(indicator::ASCIIString, country::Union(ASCIIString,Array{ASCIIString,1}), startyear::Integer, endyear::Integer)
+@compat function wdi_download(indicator::ASCIIString, country::Union{ASCIIString,Array{ASCIIString,1}}, startyear::Integer, endyear::Integer)
     if typeof(country) == ASCIIString
         url = string("http://api.worldbank.org/countries/", country, "/indicators/", indicator,
                   "?date=", startyear,":", endyear, "&per_page=25000", "&format=json")
@@ -250,7 +251,7 @@ all_countries = ["AW", "AF", "A9", "AO", "AL", "AD", "1A", "AE", "AR", "AM", "AS
 
 # example:
 #   df=wdi("NY.GNP.PCAP.CD", ["US","BR"], 1980, 2012, true)
-function wdi(indicators::Union(ASCIIString,Array{ASCIIString,1}),countries::Union(ASCIIString,Array{ASCIIString,1}),startyear::Integer=1800,endyear::Integer=3000,extra::Bool=false)
+@compat function wdi(indicators::Union{ASCIIString,Array{ASCIIString,1}},countries::Union{ASCIIString,Array{ASCIIString,1}},startyear::Integer=1800,endyear::Integer=3000,extra::Bool=false)
     if countries == "all"
         countries = all_countries
     end
