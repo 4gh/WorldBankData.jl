@@ -9,14 +9,20 @@ using DataFrames
 WorldBankData.reset_country_cache()
 WorldBankData.reset_indicator_cache()
 
-refdf = readtable(joinpath(dirname(@__FILE__),"example_data.csv"))
+refdf = readtable(joinpath(dirname(@__FILE__), "example_data.csv"))
+
+# the data gets frequently updated on the World Bank site use this to update the example_data.csv file
+function update_example_data()
+    dfnref = wdi(["NY.GNP.PCAP.CD", "AG.LND.ARBL.HA.PC"], ["US", "BR"], 1980, 2008, true)
+    writetable(joinpath(dirname(@__FILE__), "example_data.csv"), dfnref)
+end
 
 # download example case from documentation and compare to csv file
 # retry 5 times if no data
 function try_download(cntr=5)
     dfweb = ""
     while cntr > 0
-        dfweb = wdi(["NY.GNP.PCAP.CD","AG.LND.ARBL.HA.PC"], ["US","BR"], 1980, 2008, true)
+        dfweb = wdi(["NY.GNP.PCAP.CD", "AG.LND.ARBL.HA.PC"], ["US", "BR"], 1980, 2008, true)
         if size(dfweb)[1] != 0
             break
         end
@@ -32,14 +38,16 @@ end
 # data contains NA which breaks == check
 function rm_na(df)
     mval = -123456
-    df[:NY_GNP_PCAP_CD]=array(df[:NY_GNP_PCAP_CD], mval)
-    df[:AG_LND_ARBL_HA_PC]=array(df[:AG_LND_ARBL_HA_PC], mval)
+    df[:NY_GNP_PCAP_CD]=convert(Array, df[:NY_GNP_PCAP_CD], mval)
+    df[:AG_LND_ARBL_HA_PC]=convert(Array, df[:AG_LND_ARBL_HA_PC], mval)
 end
 
 dfweb = try_download()
 
 @test dfweb[:year] == refdf[:year]
 
-@test rm_na(dfweb) == rm_na(refdf)
+rm_na(dfweb)
+rm_na(refdf)
+@test dfweb == refdf
 
 end
