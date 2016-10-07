@@ -9,7 +9,7 @@ using Compat
 export wdi, search_wdi
 
 
-function download_parse_json(url::ASCIIString, verbose::Bool = false)
+function download_parse_json(url::String, verbose::Bool = false)
     if verbose
         println("download: ",url)
     end
@@ -17,15 +17,15 @@ function download_parse_json(url::ASCIIString, verbose::Bool = false)
     if request.http_code != 200
         error("download failed")
     end
-    JSON.parse(bytestring(request.body))
+    JSON.parse(String(request.body))
 end
 
 function parse_indicator(json::Array{Any,1})
-    indicator_val = ASCIIString[]
-    name_val = UTF8String[]
-    description_val = UTF8String[]
-    source_database_val = UTF8String[]
-    source_organization_val = UTF8String[]
+    indicator_val = String[]
+    name_val = String[]
+    description_val = String[]
+    source_database_val = String[]
+    source_organization_val = String[]
 
     for d in json[2]
         append!(indicator_val,[d["id"]])
@@ -49,15 +49,15 @@ function tofloat(f::AbstractString)
 end
 
 function parse_country(json::Array{Any,1})
-    iso3c_val = ASCIIString[]
-    iso2c_val = ASCIIString[]
-    name_val = UTF8String[]
-    region_val = UTF8String[]
-    capital_val = UTF8String[]
-    longitude_val = UTF8String[]
-    latitude_val = UTF8String[]
-    income_val = UTF8String[]
-    lending_val = UTF8String[]
+    iso3c_val = String[]
+    iso2c_val = String[]
+    name_val = String[]
+    region_val = String[]
+    capital_val = String[]
+    longitude_val = String[]
+    latitude_val = String[]
+    income_val = String[]
+    lending_val = String[]
 
     for d in json[2]
         append!(iso3c_val,[d["id"]])
@@ -127,20 +127,20 @@ function get_indicators()
     indicator_cache
 end
 
-regex_match(df::DataArray{UTF8String,1},regex::Regex) = convert(DataArray{Bool, 1}, map(x -> ismatch(regex,x), df))
-df_match(df::AbstractDataFrame,entry::ASCIIString,regex::Regex) = df[regex_match(df[make_symbol(entry)],regex),:]
+regex_match(df::DataArray{String,1},regex::Regex) = convert(DataArray{Bool, 1}, map(x -> ismatch(regex,x), df))
+df_match(df::AbstractDataFrame,entry::String,regex::Regex) = df[regex_match(df[make_symbol(entry)],regex),:]
 
-function country_match(entry::ASCIIString,regex::Regex)
+function country_match(entry::String,regex::Regex)
     df = get_countries()
     df_match(df,entry,regex)
 end
 
-function indicator_match(entry::ASCIIString,regex::Regex)
+function indicator_match(entry::String,regex::Regex)
     df = get_indicators()
     df_match(df,entry,regex)
 end
 
-function search_countries(entry::ASCIIString,regx::Regex)
+function search_countries(entry::String,regx::Regex)
     entries = ["name","region","capital","iso2c","iso3c","income","lending"]
     if !(entry in entries)
         error("unsupported country entry: \"",entry,"\". supported are:\n",entries)
@@ -148,7 +148,7 @@ function search_countries(entry::ASCIIString,regx::Regex)
     country_match(entry,regx)
 end
 
-function search_indicators(entry::ASCIIString,regx::Regex)
+function search_indicators(entry::String,regx::Regex)
     entries = ["name","description","topics","source_database","source_organization"]
     if !(entry in entries)
         error("unsupported indicator entry: \"",entry,"\". supported are\n",entries)
@@ -160,7 +160,7 @@ end
 # examples:
 #   search_wdi("countries","name",r"united"i)
 #   search_wdi("indicators","description",r"gross national"i)
-function search_wdi(data::ASCIIString,entry::ASCIIString,regx::Regex)
+function search_wdi(data::String,entry::String,regx::Regex)
     data_opts = ["countries","indicators"]
     if !(data in data_opts)
         error("unsupported data source:",data,". supported are:\n",data_opts)
@@ -181,17 +181,17 @@ end
     end
 end
 
-@compat function clean_append!(vals::Union{Array{UTF8String,1},Array{ASCIIString,1}},val::Union{UTF8String,ASCIIString,Void})
+@compat function clean_append!(vals::Union{Array{String,1},Array{String,1}},val::Union{String,String,Void})
     append!(vals,[clean_entry(val)])
 end
 
 # The "." character is illegal in symbol, but used a lot in WDI. replace by "_".
 # example: NY.GNP.PCAP.CD becomes NY_GNP_PCAP_CD
-function make_symbol(x::ASCIIString)
-    symbol(replace(x, ".", "_"))
+function make_symbol(x::String)
+    Symbol(replace(x, ".", "_"))
 end
 
-@compat function convert_a2f(x::Union{Array{ASCIIString,1},Array{UTF8String,1}})
+@compat function convert_a2f(x::Union{Array{String,1},Array{String,1}})
     n = length(x)
     arr = @data(zeros(n))
     for i in 1:n
@@ -200,11 +200,11 @@ end
     arr
 end
 
-function parse_wdi(indicator::ASCIIString, json, startyear::Integer, endyear::Integer)
-    country_id = ASCIIString[]
-    country_name = UTF8String[]
-    value = ASCIIString[]
-    date = ASCIIString[]
+function parse_wdi(indicator::String, json, startyear::Integer, endyear::Integer)
+    country_id = String[]
+    country_name = String[]
+    value = String[]
+    date = String[]
 
     for d in json
         clean_append!(country_id,d["country"]["id"])
@@ -229,12 +229,12 @@ function parse_wdi(indicator::ASCIIString, json, startyear::Integer, endyear::In
     df[yind, :]
 end
 
-@compat function wdi_download(indicator::ASCIIString, country::Union{ASCIIString,Array{ASCIIString,1}}, startyear::Integer, endyear::Integer)
-    if typeof(country) == ASCIIString
+@compat function wdi_download(indicator::String, country::Union{String,Array{String,1}}, startyear::Integer, endyear::Integer)
+    if typeof(country) == String
         url = string("http://api.worldbank.org/countries/", country, "/indicators/", indicator,
                   "?date=", startyear,":", endyear, "&per_page=25000", "&format=json")
         json = [download_parse_json(url)[2]]
-    elseif typeof(country) == Array{ASCIIString,1}
+    elseif typeof(country) == Array{String,1}
         json = Any[]
         for c in country
             url = string("http://api.worldbank.org/countries/", c, "/indicators/", indicator,
@@ -251,12 +251,12 @@ all_countries = ["AW", "AF", "A9", "AO", "AL", "AD", "1A", "AE", "AR", "AM", "AS
 
 # example:
 #   df=wdi("NY.GNP.PCAP.CD", ["US","BR"], 1980, 2012, true)
-@compat function wdi(indicators::Union{ASCIIString,Array{ASCIIString,1}},countries::Union{ASCIIString,Array{ASCIIString,1}},startyear::Integer=1800,endyear::Integer=3000,extra::Bool=false)
+@compat function wdi(indicators::Union{String,Array{String,1}},countries::Union{String,Array{String,1}},startyear::Integer=1800,endyear::Integer=3000,extra::Bool=false)
     if countries == "all"
         countries = all_countries
     end
 
-    if typeof(countries) == ASCIIString
+    if typeof(countries) == String
         countries = [countries]
     end
 
@@ -272,7 +272,7 @@ all_countries = ["AW", "AF", "A9", "AO", "AL", "AD", "1A", "AE", "AR", "AM", "AS
 
     df = DataFrame()
 
-    if typeof(indicators) == ASCIIString
+    if typeof(indicators) == String
         indicators=[indicators]
     end
 
