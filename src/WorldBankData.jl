@@ -5,6 +5,7 @@ using JSON
 using DataArrays
 using DataFrames
 using Compat
+import Compat: UTF8String, ASCIIString
 
 export wdi, search_wdi
 
@@ -17,7 +18,7 @@ function download_parse_json(url::ASCIIString, verbose::Bool = false)
     if request.http_code != 200
         error("download failed")
     end
-    JSON.parse(bytestring(request.body))
+    JSON.parse(Compat.String(request.body))
 end
 
 function parse_indicator(json::Array{Any,1})
@@ -188,7 +189,7 @@ end
 # The "." character is illegal in symbol, but used a lot in WDI. replace by "_".
 # example: NY.GNP.PCAP.CD becomes NY_GNP_PCAP_CD
 function make_symbol(x::ASCIIString)
-    symbol(replace(x, ".", "_"))
+    Symbol(replace(x, ".", "_"))
 end
 
 @compat function convert_a2f(x::Union{Array{ASCIIString,1},Array{UTF8String,1}})
