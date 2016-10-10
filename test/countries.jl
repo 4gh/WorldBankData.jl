@@ -3,6 +3,7 @@ module TestWDICountries
 using Base.Test
 using WorldBankData
 using Compat
+import Compat: UTF8String, ASCIIString
 
 country_data = @compat Any[ Dict("total"=>4,"per_page"=>"25000","pages"=>1,"page"=>1),
                  Any[

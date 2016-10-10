@@ -3,6 +3,7 @@ module TestWDIIndicators
 using Base.Test
 using WorldBankData
 using Compat
+import Compat: UTF8String, ASCIIString
 
 
 indicator_data = @compat Any[ Dict( "total"=>5,"per_page"=>"25000","pages"=>1,"page"=>1 ),
