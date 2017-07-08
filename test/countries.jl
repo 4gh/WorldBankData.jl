@@ -2,10 +2,9 @@ module TestWDICountries
 
 using Base.Test
 using WorldBankData
-using Compat
-import Compat: UTF8String, ASCIIString
 
-country_data = @compat Any[ Dict("total"=>4,"per_page"=>"25000","pages"=>1,"page"=>1),
+
+country_data = Any[ Dict("total"=>4,"per_page"=>"25000","pages"=>1,"page"=>1),
                  Any[
                     Dict("latitude"=>"42.5075","id"=>"AND","iso2Code"=>"AD","incomeLevel"=>Dict("id"=>"NOC","value"=>"High income: nonOECD"),"adminregion"=>Dict("id"=>"","value"=>""),"lendingType"=>Dict("id"=>"LNX","value"=>"Not classified"),"region"=>Dict("id"=>"ECS","value"=>"Europe & Central Asia (all income levels)"),"capitalCity"=>"Andorra la Vella","name"=>"Andorra","longitude"=>"1.5218"),
                     Dict("latitude"=>"","id"=>"ARB","iso2Code"=>"1A","incomeLevel"=>Dict("id"=>"NA","value"=>"Aggregates"),"adminregion"=>Dict("id"=>"","value"=>""),"lendingType"=>Dict("id"=>"","value"=>"Aggregates"),"region"=>Dict("id"=>"NA","value"=>"Aggregates"),"capitalCity"=>"","name"=>"Arab World","longitude"=>""),

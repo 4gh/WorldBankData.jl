@@ -1,11 +1,9 @@
 module WorldBankData
 
-using HTTPClient.HTTPC
+using HTTP
 using JSON
 using DataArrays
 using DataFrames
-using Compat
-import Compat: UTF8String, ASCIIString
 
 export wdi, search_wdi
 
@@ -14,11 +12,11 @@ function download_parse_json(url::String, verbose::Bool = false)
     if verbose
         println("download: ",url)
     end
-    request = HTTPC.get(url)
-    if request.http_code != 200
+    request = HTTP.get(url)
+    if HTTP.status(request) != 200
         error("download failed")
     end
-    JSON.parse(String(request.body))
+    JSON.parse(String(take!(request)))
 end
 
 function parse_indicator(json::Array{Any,1})
@@ -105,8 +103,8 @@ end
 
 function set_country_cache(df::AbstractDataFrame)
     global country_cache = df
-    if any(isna(country_cache[:iso2c])) # the iso2c code for North Africa is NA
-        country_cache[:iso2c][convert(DataArray{Bool,1}, isna(country_cache[:iso2c]))]="NA"
+    if any(isna.(country_cache[:iso2c])) # the iso2c code for North Africa is NA
+        country_cache[:iso2c][convert(DataArray{Bool,1}, isna.(country_cache[:iso2c]))]="NA"
     end
 end
 
@@ -174,15 +172,15 @@ function search_wdi(data::String,entry::String,regx::Regex)
     end
 end
 
-@compat function clean_entry(x::Union{AbstractString,Void})
-    if @compat(typeof(x) == Void)
+function clean_entry(x::Union{AbstractString,Void})
+    if typeof(x) == Void
         return "NA"
     else
         return x
     end
 end
 
-@compat function clean_append!(vals::Union{Array{String,1},Array{String,1}},val::Union{String,String,Void})
+function clean_append!(vals::Union{Array{String,1},Array{String,1}},val::Union{String,String,Void})
     append!(vals,[clean_entry(val)])
 end
 
@@ -192,7 +190,7 @@ function make_symbol(x::String)
     Symbol(replace(x, ".", "_"))
 end
 
-@compat function convert_a2f(x::Union{Array{String,1},Array{String,1}})
+function convert_a2f(x::Union{Array{String,1},Array{String,1}})
     n = length(x)
     arr = @data(zeros(n))
     for i in 1:n
@@ -222,7 +220,7 @@ function parse_wdi(indicator::String, json, startyear::Integer, endyear::Integer
     df[:year] = date
 
     # filter missing/wrong data
-    complete_cases!(df)
+    completecases!(df)
 
     checkyear(x) = (x >= startyear) & (x <= endyear)
     yind = map(checkyear,df[:year])
@@ -230,7 +228,7 @@ function parse_wdi(indicator::String, json, startyear::Integer, endyear::Integer
     df[yind, :]
 end
 
-@compat function wdi_download(indicator::String, country::Union{String,Array{String,1}}, startyear::Integer, endyear::Integer)
+function wdi_download(indicator::String, country::Union{String,Array{String,1}}, startyear::Integer, endyear::Integer)
     if typeof(country) == String
         url = string("http://api.worldbank.org/countries/", country, "/indicators/", indicator,
                   "?date=", startyear,":", endyear, "&per_page=25000", "&format=json")
@@ -252,7 +250,7 @@ all_countries = ["AW", "AF", "A9", "AO", "AL", "AD", "1A", "AE", "AR", "AM", "AS
 
 # example:
 #   df=wdi("NY.GNP.PCAP.CD", ["US","BR"], 1980, 2012, true)
-@compat function wdi(indicators::Union{String,Array{String,1}},countries::Union{String,Array{String,1}},startyear::Integer=1800,endyear::Integer=3000,extra::Bool=false)
+function wdi(indicators::Union{String,Array{String,1}},countries::Union{String,Array{String,1}},startyear::Integer=1800,endyear::Integer=3000,extra::Bool=false)
     if countries == "all"
         countries = all_countries
     end

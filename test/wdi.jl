@@ -2,10 +2,9 @@ module TestParseWDI
 
 using Base.Test
 using WorldBankData
-using Compat
 
 
-us_gnp_data = @compat Any[  Dict( "total"=>23,"per_page"=>"25000","pages"=>1,"page"=>1 ),
+us_gnp_data = Any[  Dict( "total"=>23,"per_page"=>"25000","pages"=>1,"page"=>1 ),
                  Any[ Dict("date"=>"2012","value"=>"52340","indicator"=>Dict("id"=>"NY.GNP.PCAP.CD","value"=>"GNI per capita, Atlas method (current US\$)"),"country"=>Dict("id"=>"US","value"=>"United States"),"decimal"=>"0"),
                    Dict("date"=>"2011","value"=>"50650","indicator"=>Dict("id"=>"NY.GNP.PCAP.CD","value"=>"GNI per capita, Atlas method (current US\$)"),"country"=>Dict("id"=>"US","value"=>"United States"),"decimal"=>"0"),
                    Dict("date"=>"2010","value"=>"48960","indicator"=>Dict("id"=>"NY.GNP.PCAP.CD","value"=>"GNI per capita, Atlas method (current US\$)"),"country"=>Dict("id"=>"US","value"=>"United States"),"decimal"=>"0"),
