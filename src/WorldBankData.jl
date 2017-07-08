@@ -4,6 +4,8 @@ using HTTPClient.HTTPC
 using JSON
 using DataArrays
 using DataFrames
+using Compat
+import Compat: UTF8String, ASCIIString
 
 export wdi, search_wdi
 
