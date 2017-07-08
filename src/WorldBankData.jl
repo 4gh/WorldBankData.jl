@@ -47,6 +47,15 @@ function tofloat(f::AbstractString)
      end
 end
 
+function convert_a2f(x::Union{Array{String,1},Array{String,1}})
+    n = length(x)
+    arr = @data(zeros(n))
+    for i in 1:n
+        arr[i]=tofloat(x[i])
+    end
+    arr
+end
+
 function parse_country(json::Array{Any,1})
     iso3c_val = String[]
     iso2c_val = String[]
@@ -126,7 +135,14 @@ function get_indicators()
     indicator_cache
 end
 
+# The "." character is illegal in symbol, but used a lot in WDI. replace by "_".
+# example: NY.GNP.PCAP.CD becomes NY_GNP_PCAP_CD
+function make_symbol(x::String)
+    Symbol(replace(x, ".", "_"))
+end
+
 regex_match(df::DataArray{String,1},regex::Regex) = convert(DataArray{Bool, 1}, map(x -> ismatch(regex,x), df))
+
 df_match(df::AbstractDataFrame,entry::String,regex::Regex) = df[regex_match(df[make_symbol(entry)],regex),:]
 
 function country_match(entry::String,regex::Regex)
@@ -182,21 +198,6 @@ end
 
 function clean_append!(vals::Union{Array{String,1},Array{String,1}},val::Union{String,String,Void})
     append!(vals,[clean_entry(val)])
-end
-
-# The "." character is illegal in symbol, but used a lot in WDI. replace by "_".
-# example: NY.GNP.PCAP.CD becomes NY_GNP_PCAP_CD
-function make_symbol(x::String)
-    Symbol(replace(x, ".", "_"))
-end
-
-function convert_a2f(x::Union{Array{String,1},Array{String,1}})
-    n = length(x)
-    arr = @data(zeros(n))
-    for i in 1:n
-        arr[i]=tofloat(x[i])
-    end
-    arr
 end
 
 function parse_wdi(indicator::String, json, startyear::Integer, endyear::Integer)
