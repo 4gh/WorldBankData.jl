@@ -1,6 +1,7 @@
 module TestExampleDownload
 
-using Base.Test
+using CSV
+using Test
 using WorldBankData
 using DataFrames
 
@@ -9,12 +10,12 @@ using DataFrames
 WorldBankData.reset_country_cache()
 WorldBankData.reset_indicator_cache()
 
-refdf = readtable(joinpath(dirname(@__FILE__), "example_data.csv"))
+refdf = CSV.read(joinpath(dirname(@__FILE__), "example_data.csv"))
 
 # the data gets frequently updated on the World Bank site use this to update the example_data.csv file
 function update_example_data()
-    dfnref = wdi(["NY.GNP.PCAP.CD", "AG.LND.ARBL.HA.PC"], ["US", "BR"], 1980, 2008, true)
-    writetable(joinpath(dirname(@__FILE__), "example_data.csv"), dfnref)
+    dfnref = wdi(["NY.GNP.PCAP.CD", "AG.LND.ARBL.HA.PC"], ["US", "BR"], 1980, 2008, extra=true, verbose=true)
+    CSV.write(joinpath(dirname(@__FILE__), "example_data.csv"), dfnref)
 end
 
 # download example case from documentation and compare to csv file
@@ -22,7 +23,7 @@ end
 function try_download(cntr=5)
     dfweb = ""
     while cntr > 0
-        dfweb = wdi(["NY.GNP.PCAP.CD", "AG.LND.ARBL.HA.PC"], ["US", "BR"], 1980, 2008, true)
+        dfweb = wdi(["NY.GNP.PCAP.CD", "AG.LND.ARBL.HA.PC"], ["US", "BR"], 1980, 2008, extra=true, verbose=true)
         if size(dfweb)[1] != 0
             break
         end
@@ -37,9 +38,8 @@ end
 
 # data contains NA which breaks == check
 function rm_na(df)
-    mval = -123456
-    df[:NY_GNP_PCAP_CD]=convert(Array, df[:NY_GNP_PCAP_CD], mval)
-    df[:AG_LND_ARBL_HA_PC]=convert(Array, df[:AG_LND_ARBL_HA_PC], mval)
+    df[map(ismissing, df[:NY_GNP_PCAP_CD]), :NY_GNP_PCAP_CD]=-123456
+    df[map(ismissing, df[:AG_LND_ARBL_HA_PC]), :AG_LND_ARBL_HA_PC]=-123456
 end
 
 dfweb = try_download()

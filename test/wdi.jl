@@ -1,6 +1,6 @@
 module TestParseWDI
 
-using Base.Test
+using Test
 using WorldBankData
 
 

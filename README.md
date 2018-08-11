@@ -7,7 +7,8 @@ The World Bank provides free access to data about development at
 The primary collection of development indicators is called World
 Development Indicators (WDI).
 
-This module has functions to easily access and download the data.
+This module provides two functions to access and download the data:
+`search_wdi()` and `wdi()`.
 
 It follows roughly the
 [R WDI package](http://cran.r-project.org/web/packages/WDI/index.html).
@@ -15,7 +16,8 @@ It follows roughly the
 ## Installation
 
 ```julia
-julia> Pkg.add("WorldBankData")
+using Pkg
+Pkg.add("WorldBankData")
 ```
 
 ## Basic Examples
@@ -28,42 +30,43 @@ using WorldBankData
 df=wdi("NY.GNP.PCAP.CD", ["US","BR"])
 ```
 
-The WDI indicator `NY.GNP.PCAP.CD` becomes the symbol `NY_GNP_PCAP_CD` in the DataFrame. For
-example:
-```julia
-using WorldBankData
-using Winston
-
-df=wdi("NY.GNP.PCAP.CD", ["US","BR"])
-plot(df[df[:iso2c] .== "US",:][:year], df[df[:iso2c] .== "US",:][:NY_GNP_PCAP_CD])
-```
+The WDI indicator `NY.GNP.PCAP.CD` becomes the symbol `NY_GNP_PCAP_CD` in the
+DataFrame, i.e. `.` gets replaced by `_`.
 
 ### Multiple countries and indicators
 
 ```julia
 using WorldBankData
-df=wdi(["NY.GNP.PCAP.CD","AG.LND.ARBL.HA.PC"], ["US","BR"], 1980, 2008, true)
+df=wdi(["NY.GNP.PCAP.CD","AG.LND.ARBL.HA.PC"], ["US","BR"], startyear=1980, endyear=2008, extra=true)
 ```
 
 This returns the GNI per capita and the arable land (hectares per
 person) for the time range 1980-2008 for the US and Brazil. It also
-attaches extra country information (the `true` argument) like the
+attaches extra country information (the `extra=true` argument) like the
 capital, longitude, latitude, income range, etc.
 
-## Optional arguments
+## Arguments
 
 The `wdi` function has the following arguments:
 
 ```julia
-wdi(indicators, countries, startyear, endyear, extra)
+wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,Array{String,1}}, startyear::Integer=1800, endyear::Integer=3000; extra::Bool=false, verbose::Bool=false)
 ```
 
-It needs a minimum of two arguments: the indicators (from the WDI
-database) and the countries (ISO two letter country codes). The rest
-are optional.
+It needs a minimum of two arguments: the `indicators` (from the WDI
+database) and the `countries` (ISO two letter country codes). The rest
+are optional arguments.
 
-extra: If `extra=true`, `wdi()` attaches extra country data (like the
+`startyear`: First year to include.
+
+`endyear`: Last year to include.
+
+`extra`: If `extra=true`, `wdi()` attaches extra country data (like the
 capital) to the returned DataFrame.
+
+`verbose`: If `verbose=true`, `wdi()` will print URL download information. This
+can be used as a progress indicator if many countries and indicators are
+requested.
 
 ## Searching
 
@@ -77,6 +80,7 @@ One can search for "countries" or "indicators" data.
 ### Example for country search by name
 
 ```julia
+julia> using WorldBankData
 julia> res=search_wdi("countries","name",r"united"i)
 julia> res[:name]
 3-element DataArray{UTF8String,1}:
@@ -93,6 +97,7 @@ julia> res[:iso2c]
 ### Example for indicator search by description
 
 ```julia
+julia> using WorldBankData
 julia> res=search_wdi("indicators","description",r"gross national expenditure"i)
 6x5 DataFrame
 |-------|---------------------|------------|---------|
@@ -126,12 +131,20 @@ julia> res[:indicator]
 
 The `search_wdi()` function has the following arguments
 ```julia
-function search_wdi(data_source, entry, regex)
+search_wdi(data::String, entry::String, regx::Regex)::DataFrame
 ```
 
-The `data_source` is either `countries` or `indicators`. The entry is
-one of the attributes (like name). The regex is the regular expression
-to search for.
+`data`: Either `countries` or `indicators`.
+
+`entry`: One of the attributes (like name).
+
+`regex`: Regular expression to search for.
+
+"countries" can be searched for "name", "region", "capital", "iso2c",
+"iso3c", "income", and "lending".
+
+"indicators" can be searched for "name", "description", "topics",
+"source_database", and "source_organization".
 
 The search function uses two DataFrames `country_cache` and
 `indicator_cache` and searches through these. On the first search it
@@ -142,12 +155,6 @@ session. After the first use the data is cached.
 Note that the last argument to `search_wdi()` is a regular expression
 denoted by `r"..."` and an `i` at the end means that it is case
 insensitive.
-
-"countries" can be searched for "name", "region", "capital", "iso2c",
-"iso3c", "income", and "lending".
-
-"indicators" can be searched for "name", "description", "topics",
-"source_database", and "source_organization".
 
 ### Examples of country searches
 
@@ -196,7 +203,7 @@ julia> search_wdi("indicators","source_organization",r"Global Partnership"i)
 ### Extracting country data from results
 
 ```julia
-df=wdi("NY.GNP.PCAP.CD", ["US","BR"], 1980, 2012, true)
+df=wdi("NY.GNP.PCAP.CD", ["US","BR"], 1980, 2012, extra=true)
 us_gnp=df[df[:iso2c] .== "US",:]
 ```
 
@@ -217,13 +224,16 @@ df[:year] = map(Date, df[:year])
 
 ### Plotting
 
+Install the [Plots.jl](https://github.com/JuliaPlots/Plots.jl) package with
+`Pkg.add("Plots")`.
+
 ```julia
 using WorldBankData
-using Winston
+using Plots
 
-df=wdi("AG.LND.ARBL.HA.PC", "US", 1900, 2011)
+df=wdi("AG.LND.ARBL.HA.PC", "US", 1980, 2010)
 
-plot(df[:year], df[:AG.LND.ARBL.HA.PC])
+plot(df[:year], df[:AG_LND_ARBL_HA_PC])
 ```
 
 ### Empty/Missing results
@@ -259,9 +269,11 @@ data can easily be stored on local disk.
 Download and store the country and indicator information in csv files:
 
 ```julia
-julia> using WorldBankData, DataFrames
-julia> writetable("country_cache.csv",WorldBankData.get_countries())
-julia> writetable("indicator_cache.csv", WorldBankData.get_indicators())
+using WorldBankData
+using DataFrames
+using CSV
+CSV.write("country_cache.csv",WorldBankData.get_countries())
+CSV.write("indicator_cache.csv", WorldBankData.get_indicators())
 ```
 
 These can be used in the script to set the WorldBankData cache
@@ -273,10 +285,9 @@ using the `WorldBankData.set_country_cache()` and
 ```julia
 using WorldBankData
 using DataFrames
-WorldBankData.set_country_cache(readtable("country_cache.csv"))
-WorldBankData.set_indicator_cache(readtable("indicator_cache.csv"))
+WorldBankData.set_country_cache(CSV.read("country_cache.csv"))
+WorldBankData.set_indicator_cache(CSV.read("indicator_cache.csv"))
 ```
-
 From then on the `search_wdi()` function will use the data read from
 disk.
 
@@ -290,12 +301,13 @@ In a similar way the indicator data itself can be cached.
 ```julia
 using WorldBankData
 using DataFrames
+using CSV
 
 function update_us_gnp_per_cap()
     df = wdi("NY.GNP.PCAP.CD", "US")
-    writetable("us_gnp.csv",df)
+    CSV.write("us_gnp.csv",df)
 end
-df=readtable("us_gnp.csv")
+df=CSV.read("us_gnp.csv")
 ```
 one then runs the `update_us_gnp_per_cap()` function only when needed.
 

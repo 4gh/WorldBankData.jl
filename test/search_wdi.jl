@@ -1,6 +1,6 @@
 module TestWDISearchWDI
 
-using Base.Test
+using Test
 using WorldBankData
 
 

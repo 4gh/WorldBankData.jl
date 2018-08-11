@@ -1,25 +1,28 @@
+"""
+Provides two functions, [`search_wdi`](@ref) and [`wdi`](@ref), for searching and fetching World Development Indicators data from the World Bank.
+"""
 module WorldBankData
 
 using HTTP
 using JSON
-using DataArrays
 using DataFrames
 
 export wdi, search_wdi
 
 
-function download_parse_json(url::String, verbose::Bool = false)
+function download_parse_json(url::String; verbose::Bool=false)
     if verbose
-        println("download: ",url)
+        println("download: ", url)
     end
     request = HTTP.get(url)
-    if HTTP.status(request) != 200
+    if request.status != 200
         error("download failed")
     end
-    JSON.parse(String(take!(request)))
+    JSON.parse(String(request.body))
 end
 
-function parse_indicator(json::Array{Any,1})
+# convert json from worldbank for an indicator to dataframe
+function parse_indicator(json::Array{Any,1})::DataFrame
     indicator_val = String[]
     name_val = String[]
     description_val = String[]
@@ -39,24 +42,25 @@ function parse_indicator(json::Array{Any,1})
               source_organization = source_organization_val)
 end
 
-function tofloat(f::AbstractString)
+function tofloat(f::AbstractString)::Union{Missing, Float64}
      try
-         return float(f)
+         return parse(Float64, f)
      catch
-         return NA
+         return missing
      end
 end
 
-function convert_a2f(x::Union{Array{String,1},Array{String,1}})
+function convert_a2f(x::Union{Array{String,1},Array{String,1}})::Array{Union{Missing, Float64}, 1}
     n = length(x)
-    arr = @data(zeros(n))
+    arr = zeros(Union{Missing, Float64}, n)
     for i in 1:n
         arr[i]=tofloat(x[i])
     end
     arr
 end
 
-function parse_country(json::Array{Any,1})
+# convert country json to DataFrame
+function parse_country(json::Array{Any,1})::DataFrame
     iso3c_val = String[]
     iso2c_val = String[]
     name_val = String[]
@@ -87,14 +91,14 @@ function parse_country(json::Array{Any,1})
               latitude = latitude_val, income = income_val, lending = lending_val)
 end
 
-function download_indicators()
-    dat = download_parse_json("http://api.worldbank.org/indicators?per_page=25000&format=json")
+function download_indicators(;verbose::Bool=false)::DataFrame
+    dat = download_parse_json("http://api.worldbank.org/indicators?per_page=25000&format=json", verbose=verbose)
 
     parse_indicator(dat)
 end
 
-function download_countries()
-    dat = download_parse_json("http://api.worldbank.org/countries/all?per_page=25000&format=json")
+function download_countries(;verbose::Bool=false)::DataFrame
+    dat = download_parse_json("http://api.worldbank.org/countries/all?per_page=25000&format=json", verbose=verbose)
 
     parse_country(dat)
 end
@@ -112,50 +116,48 @@ end
 
 function set_country_cache(df::AbstractDataFrame)
     global country_cache = df
-    if any(isna.(country_cache[:iso2c])) # the iso2c code for North Africa is NA
-        country_cache[:iso2c][convert(DataArray{Bool,1}, isna.(country_cache[:iso2c]))]="NA"
-    end
 end
 
 function set_indicator_cache(df::AbstractDataFrame)
     global indicator_cache = df
 end
 
-function get_countries()
+function get_countries(;verbose::Bool=false)
     if country_cache == false
-        set_country_cache(download_countries())
+        set_country_cache(download_countries(verbose=verbose))
     end
     country_cache
 end
 
-function get_indicators()
+function get_indicators(;verbose::Bool=false)
     if indicator_cache == false
-        set_indicator_cache(download_indicators())
+        set_indicator_cache(download_indicators(verbose=verbose))
     end
     indicator_cache
 end
 
 # The "." character is illegal in symbol, but used a lot in WDI. replace by "_".
 # example: NY.GNP.PCAP.CD becomes NY_GNP_PCAP_CD
-function make_symbol(x::String)
-    Symbol(replace(x, ".", "_"))
+function make_symbol(x::String)::Symbol
+    Symbol(replace(x, "." => "_"))
 end
 
-regex_match(df::DataArray{String,1},regex::Regex) = convert(DataArray{Bool, 1}, map(x -> ismatch(regex,x), df))
+# return boolean array of matching entries
+regex_match(df::Array{String,1}, regex::Regex)::Array{Bool, 1} = map(x -> occursin(regex, x), df)
 
-df_match(df::AbstractDataFrame,entry::String,regex::Regex) = df[regex_match(df[make_symbol(entry)],regex),:]
+df_match(df::AbstractDataFrame, entry::String, regex::Regex)::DataFrame = df[regex_match(df[make_symbol(entry)], regex),:]
 
-function country_match(entry::String,regex::Regex)
+function country_match(entry::String,regex::Regex)::DataFrame
     df = get_countries()
-    df_match(df,entry,regex)
+    df_match(df, entry, regex)
 end
 
-function indicator_match(entry::String,regex::Regex)
+function indicator_match(entry::String,regex::Regex)::DataFrame
     df = get_indicators()
     df_match(df,entry,regex)
 end
 
-function search_countries(entry::String,regx::Regex)
+function search_countries(entry::String,regx::Regex)::DataFrame
     entries = ["name","region","capital","iso2c","iso3c","income","lending"]
     if !(entry in entries)
         error("unsupported country entry: \"",entry,"\". supported are:\n",entries)
@@ -163,7 +165,7 @@ function search_countries(entry::String,regx::Regex)
     country_match(entry,regx)
 end
 
-function search_indicators(entry::String,regx::Regex)
+function search_indicators(entry::String, regx::Regex)::DataFrame
     entries = ["name","description","topics","source_database","source_organization"]
     if !(entry in entries)
         error("unsupported indicator entry: \"",entry,"\". supported are\n",entries)
@@ -172,35 +174,50 @@ function search_indicators(entry::String,regx::Regex)
 end
 
 
-# examples:
-#   search_wdi("countries","name",r"united"i)
-#   search_wdi("indicators","description",r"gross national"i)
-function search_wdi(data::String,entry::String,regx::Regex)
-    data_opts = ["countries","indicators"]
-    if !(data in data_opts)
-        error("unsupported data source:",data,". supported are:\n",data_opts)
-    end
+"""
+search_wdi(data::String, entry::String, regx::Regex)::DataFrame
+
+Search World Development Indicators for countries or indicators.
+
+https://datacatalog.worldbank.org/dataset/world-development-indicators
+
+**Arguments**
+
+* `data` : data to search for: "indicators" or "countries"
+* `entry` : entry to lookup
+  for countries: `name`,`region`,`capital`,`iso2c`,`iso3c`,`income`,`lending`
+  for indicators: `name`, `description`, `topics`, `source_database`, `source_organization`
+* `regex` : regular expression to find
+
+# Examples
+```julia
+search_wdi("countries", "name", r"united"i)
+search_wdi("indicators", "description", r"gross national"i)
+```
+"""
+function search_wdi(data::String, entry::String, regx::Regex)::DataFrame
     if data == "countries"
-        return search_countries(entry,regx)
-    end
-    if data == "indicators"
-        return search_indicators(entry,regx)
+        return search_countries(entry, regx)
+    elseif data == "indicators"
+        return search_indicators(entry, regx)
+    else
+        error("unsupported data source:", data, ". supported are: \"countries\" or \"indicators\"")
     end
 end
 
-function clean_entry(x::Union{AbstractString,Void})
-    if typeof(x) == Void
+function clean_entry(x::Union{AbstractString, Nothing})
+    if typeof(x) == Nothing
         return "NA"
     else
         return x
     end
 end
 
-function clean_append!(vals::Union{Array{String,1},Array{String,1}},val::Union{String,String,Void})
+function clean_append!(vals::Union{Array{String,1},Array{String,1}}, val::Union{String,String, Nothing})
     append!(vals,[clean_entry(val)])
 end
 
-function parse_wdi(indicator::String, json, startyear::Integer, endyear::Integer)
+function parse_wdi(indicator::String, json::Array{Any,1}, startyear::Integer, endyear::Integer)::DataFrame
     country_id = String[]
     country_name = String[]
     value = String[]
@@ -220,38 +237,55 @@ function parse_wdi(indicator::String, json, startyear::Integer, endyear::Integer
     df[make_symbol(indicator)] = value
     df[:year] = date
 
-    # filter missing/wrong data
-    completecases!(df)
+    dropmissing(df)
 
     checkyear(x) = (x >= startyear) & (x <= endyear)
     yind = map(checkyear,df[:year])
-    yind = convert(DataArray{Bool, 1}, yind)
     df[yind, :]
 end
 
-function wdi_download(indicator::String, country::Union{String,Array{String,1}}, startyear::Integer, endyear::Integer)
+function wdi_download(indicator::String, country::Union{String,Array{String,1}}, startyear::Integer, endyear::Integer; verbose::Bool=false)::DataFrame
     if typeof(country) == String
         url = string("http://api.worldbank.org/countries/", country, "/indicators/", indicator,
                   "?date=", startyear,":", endyear, "&per_page=25000", "&format=json")
-        json = [download_parse_json(url)[2]]
+        json = [download_parse_json(url, verbose=verbose)[2]]
     elseif typeof(country) == Array{String,1}
         json = Any[]
         for c in country
             url = string("http://api.worldbank.org/countries/", c, "/indicators/", indicator,
                          "?date=", startyear,":", endyear, "&per_page=25000", "&format=json")
-            append!(json,[download_parse_json(url)[2];])
+            append!(json,[download_parse_json(url, verbose=verbose)[2];])
         end
     end
 
-    parse_wdi(indicator,json, startyear, endyear)
+    parse_wdi(indicator, json, startyear, endyear)
 end
 
-all_countries = ["AW", "AF", "A9", "AO", "AL", "AD", "1A", "AE", "AR", "AM", "AS", "AG", "AU", "AT", "AZ", "BI", "BE", "BJ", "BF", "BD", "BG", "BH", "BS", "BA", "BY", "BZ", "BM", "BO", "BR", "BB", "BN", "BT", "BW", "C9", "CF", "CA", "C4", "C5", "CH", "JG", "CL", "CN", "CI", "C6", "C7", "CM", "CD", "CG", "CO", "KM", "CV", "CR", "C8", "S3", "CU", "CW", "KY", "CY", "CZ", "DE", "DJ", "DM", "DK", "DO", "DZ", "4E", "Z4", "7E", "Z7", "EC", "EG", "XC", "ER", "ES", "EE", "ET", "EU", "FI", "FJ", "FR", "FO", "FM", "GA", "GB", "GE", "GH", "GN", "GM", "GW", "GQ", "GR", "GD", "GL", "GT", "GU", "GY", "XD", "HK", "HN", "XE", "HR", "HT", "HU", "ID", "IM", "IN", "XY", "IE", "IR", "IQ", "IS", "IL", "IT", "JM", "JO", "JP", "KZ", "KE", "KG", "KH", "KI", "KN", "KR", "KV", "KW", "XJ", "LA", "LB", "LR", "LY", "LC", "ZJ", "XL", "XM", "LI", "LK", "XN", "XO", "LS", "LT", "LU", "LV", "MO", "MF", "MA", "MC", "MD", "MG", "MV", "ZQ", "MX", "MH", "XP", "MK", "ML", "MT", "MM", "XQ", "ME", "MN", "MP", "MZ", "MR", "MU", "MW", "MY", "XU", "M2", "NA", "NC", "NE", "NG", "NI", "NL", "XR", "NO", "NP", "NZ", "XS", "OE", "OM", "S4", "PK", "PA", "PE", "PH", "PW", "PG", "PL", "PR", "KP", "PT", "PY", "PS", "S2", "PF", "QA", "RO", "RU", "RW", "8S", "SA", "SD", "SN", "SG", "SB", "SL", "SV", "SM", "SO", "RS", "ZF", "SS", "ZG", "S1", "ST", "SR", "SK", "SI", "SE", "SZ", "SX", "A4", "SC", "SY", "TC", "TD", "TG", "TH", "TJ", "TM", "TL", "TO", "TT", "TN", "TR", "TV", "TW", "TZ", "UG", "UA", "XK", "XT", "UY", "US", "UZ", "VC", "VE", "VI", "VN", "VU", "1W", "WS", "A5", "YE", "ZA", "ZM", "ZW" ]
+all_countries = ["AW", "AF", "A9", "AO", "AL", "AD", "L5", "1A", "AE", "AR", "AM", "AS", "AG", "AU", "AT", "AZ", "BI", "B4", "B7", "BE", "BJ", "BF", "BD", "BG", "B1", "BH", "BS", "BA", "B2", "BY", "BZ", "B3", "BM", "BO", "BR", "BB", "BN", "B6", "BT", "BW", "C9", "CF", "CA", "C4", "B8", "C5", "CH", "JG", "CL", "CN", "CI", "C6", "C7", "CM", "CD", "CG", "CO", "KM", "CV", "CR", "C8", "S3", "CU", "CW", "KY", "CY", "CZ", "D4", "D7", "DE", "D8", "DJ", "D2", "DM", "D3", "D9", "DK", "N6", "DO", "D5", "F6", "D6", "6D", "DZ", "4E", "V2", "Z4", "7E", "Z7", "EC", "EG", "XC", "ER", "ES", "EE", "ET", "EU", "F1", "FI", "FJ", "FR", "FO", "FM", "6F", "GA", "GB", "GE", "GH", "GI", "GN", "GM", "GW", "GQ", "GR", "GD", "GL", "GT", "GU", "GY", "XD", "HK", "HN", "XE", "HR", "HT", "HU", "ZB", "XF", "ZT", "XG", "XH", "ID", "XI", "IM", "IN", "XY", "IE", "IR", "IQ", "IS", "IL", "IT", "JM", "JO", "JP", "KZ", "KE", "KG", "KH", "KI", "KN", "KR", "KW", "XJ", "LA", "LB", "LR", "LY", "LC", "ZJ", "L4", "XL", "XM", "LI", "LK", "XN", "XO", "LS", "V3", "LT", "LU", "LV", "MO", "MF", "MA", "L6", "MC", "MD", "M1", "MG", "MV", "ZQ", "MX", "MH", "XP", "MK", "ML", "MT", "MM", "XQ", "ME", "MN", "MP", "MZ", "MR", "MU", "MW", "MY", "XU", "M2", "NA", "NC", "NE", "NG", "NI", "NL", "6L", "NO", "NP", "6X", "NR", "6N", "NZ", "OE", "OM", "S4", "PK", "PA", "PE", "PH", "PW", "PG", "PL", "V1", "PR", "KP", "PT", "PY", "PS", "S2", "V4", "PF", "QA", "RO", "R6", "O6", "RU", "RW", "8S", "SA", "L7", "SD", "SN", "SG", "SB", "SL", "SV", "SM", "SO", "RS", "ZF", "SS", "ZG", "S1", "ST", "SR", "SK", "SI", "SE", "SZ", "SX", "A4", "SC", "SY", "TC", "TD", "T4", "T7", "TG", "TH", "TJ", "TM", "T2", "TL", "T3", "TO", "T5", "T6", "TT", "TN", "TR", "TV", "TW", "TZ", "UG", "UA", "XT", "UY", "US", "UZ", "VC", "VE", "VG", "VI", "VN", "VU", "1W", "WS", "XK", "A5", "YE", "ZA", "ZM", "ZW"]
 
+"""
+wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,Array{String,1}}, startyear::Integer=1800, endyear::Integer=3000; extra::Bool=false, verbose::Bool=false)::DataFrame
 
-# example:
-#   df=wdi("NY.GNP.PCAP.CD", ["US","BR"], 1980, 2012, true)
-function wdi(indicators::Union{String,Array{String,1}},countries::Union{String,Array{String,1}},startyear::Integer=1800,endyear::Integer=3000,extra::Bool=false)
+Download data from World Development Indicators (WDI) Data Catalog of the World Bank.
+
+https://datacatalog.worldbank.org/dataset/world-development-indicators
+
+**Arguments**
+`indicators` : indicator name or array of indicators
+`countries` : string or string array of ISO 2 letter country codes or `all` for all countries.
+`startyear` : first year to include
+`endyear` : last year to include
+`extra` : if `true` additional country data should be included (region, capital, longitude, latitude, income, lending)
+`verbose` : if `true` print URLs downloaded, useful as progress indicator.
+
+# Examples
+```julia
+df = wdi("NY.GNP.PCAP.CD", "US", 1980, 2012, extra=true)
+df = wdi("NY.GNP.PCAP.CD", ["US","BR"], 1980, 2012, extra=true)
+df = wdi(["NY.GNP.PCAP.CD", "AG.LND.ARBL.HA.PC"], ["US","BR"], 1980, 2012, extra=true)
+```
+"""
+function wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,Array{String,1}}, startyear::Integer=1800, endyear::Integer=3000; extra::Bool=false, verbose::Bool=false)::DataFrame
     if countries == "all"
         countries = all_countries
     end
@@ -270,24 +304,28 @@ function wdi(indicators::Union{String,Array{String,1}},countries::Union{String,A
         error("startyear has to be < endyear. startyear=",startyear,". endyear=",endyear)
     end
 
-    df = DataFrame()
-
     if typeof(indicators) == String
         indicators=[indicators]
     end
 
-    for ind in indicators
-        dfn = wdi_download(ind, countries, startyear, endyear)
-        df = vcat(df,dfn)
+    df = wdi_download(indicators[1], countries, startyear, endyear, verbose=verbose)
+
+    if length(indicators) > 1
+        for ind in indicators[2:length(indicators)]
+            dfn = wdi_download(ind, countries, startyear, endyear, verbose=verbose)
+            df = join(df, dfn, on = [x for x in filter(x -> !(x in map(make_symbol, indicators)), names(df))],
+                               kind = :outer)
+        end
     end
 
     if extra
-        cntdat = get_countries()
+        cntdat = get_countries(verbose=verbose)
         df = join(df,cntdat,on=:iso2c)
     end
 
+    sort!(df, [order(:iso2c), order(:year)])
+
     df
 end
-
 
 end
