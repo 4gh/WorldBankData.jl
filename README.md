@@ -224,16 +224,16 @@ df[:year] = map(Date, df[:year])
 
 ### Plotting
 
-Install the [Plots.jl](https://github.com/JuliaPlots/Plots.jl) package with
-`Pkg.add("Plots")`.
+Install the [StatPlots.jl](https://github.com/JuliaPlots/StatPlots.jl) package with
+`Pkg.add("StatPlots")`.
 
 ```julia
 using WorldBankData
-using Plots
+using StatPlots
 
 df=wdi("AG.LND.ARBL.HA.PC", "US", 1980, 2010)
 
-plot(df[:year], df[:AG_LND_ARBL_HA_PC])
+@df df scatter(:year, :AG_LND_ARBL_HA_PC)
 ```
 
 ### Empty/Missing results
