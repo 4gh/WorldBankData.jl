@@ -16,7 +16,7 @@ function download_parse_json(url::String; verbose::Bool=false)
     end
     request = HTTP.get(url)
     if request.status != 200
-        error("download failed")
+        throw(ErrorException("download failed"))
     end
     JSON.parse(String(request.body))
 end
@@ -43,20 +43,8 @@ function parse_indicator(json::Array{Any,1})::DataFrame
 end
 
 function tofloat(f::AbstractString)::Union{Missing, Float64}
-     try
-         return parse(Float64, f)
-     catch
-         return missing
-     end
-end
-
-function convert_a2f(x::Union{Array{String,1},Array{String,1}})::Array{Union{Missing, Float64}, 1}
-    n = length(x)
-    arr = zeros(Union{Missing, Float64}, n)
-    for i in 1:n
-        arr[i]=tofloat(x[i])
-    end
-    arr
+     x = tryparse(Float64, f)
+     x isa Nothing ? missing : x
 end
 
 # convert country json to DataFrame
@@ -83,8 +71,8 @@ function parse_country(json::Array{Any,1})::DataFrame
         append!(lending_val,[d["lendingType"]["value"]])
     end
 
-    longitude_val = convert_a2f(longitude_val)
-    latitude_val = convert_a2f(latitude_val)
+    longitude_val = tofloat.(longitude_val)
+    latitude_val = tofloat.(latitude_val)
 
     DataFrame(iso3c = iso3c_val, iso2c = iso2c_val, name = name_val,
               region = region_val, capital = capital_val, longitude = longitude_val,
@@ -142,10 +130,7 @@ function make_symbol(x::String)::Symbol
     Symbol(replace(x, "." => "_"))
 end
 
-# return boolean array of matching entries
-regex_match(df::Array{String,1}, regex::Regex)::Array{Bool, 1} = map(x -> occursin(regex, x), df)
-
-df_match(df::AbstractDataFrame, entry::String, regex::Regex)::DataFrame = df[regex_match(df[make_symbol(entry)], regex),:]
+df_match(df::AbstractDataFrame, entry::String, regex::Regex)::DataFrame = df[occursin.(Ref(regex), df[make_symbol(entry)]),:]
 
 function country_match(entry::String,regex::Regex)::DataFrame
     df = get_countries()
@@ -160,7 +145,7 @@ end
 function search_countries(entry::String,regx::Regex)::DataFrame
     entries = ["name","region","capital","iso2c","iso3c","income","lending"]
     if !(entry in entries)
-        error("unsupported country entry: \"",entry,"\". supported are:\n",entries)
+        throw(ErrorException("unsupported country entry: \"",entry,"\". supported are:\n",entries))
     end
     country_match(entry,regx)
 end
@@ -168,7 +153,7 @@ end
 function search_indicators(entry::String, regx::Regex)::DataFrame
     entries = ["name","description","topics","source_database","source_organization"]
     if !(entry in entries)
-        error("unsupported indicator entry: \"",entry,"\". supported are\n",entries)
+        throw(ErrorException("unsupported indicator entry: \"",entry,"\". supported are\n",entries))
     end
     indicator_match(entry,regx)
 end
@@ -201,7 +186,7 @@ function search_wdi(data::String, entry::String, regx::Regex)::DataFrame
     elseif data == "indicators"
         return search_indicators(entry, regx)
     else
-        error("unsupported data source:", data, ". supported are: \"countries\" or \"indicators\"")
+        throw(ErrorException("unsupported data source:", data, ". supported are: \"countries\" or \"indicators\""))
     end
 end
 
@@ -230,8 +215,8 @@ function parse_wdi(indicator::String, json::Array{Any,1}, startyear::Integer, en
         clean_append!(date,d["date"])
     end
 
-    value = convert_a2f(value)
-    date = convert_a2f(date)
+    value = tofloat.(value)
+    date = tofloat.(date)
 
     df = DataFrame(iso2c = country_id, country = country_name)
     df[make_symbol(indicator)] = value
@@ -240,7 +225,7 @@ function parse_wdi(indicator::String, json::Array{Any,1}, startyear::Integer, en
     dropmissing(df)
 
     checkyear(x) = (x >= startyear) & (x <= endyear)
-    yind = map(checkyear,df[:year])
+    yind = map(checkyear, df[:year])
     df[yind, :]
 end
 
@@ -296,12 +281,12 @@ function wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,
 
     for c in countries
         if ! (c in all_countries)
-            error("country ",c," not found")
+            throw(ErrorException("country ",c," not found"))
         end
     end
 
     if ! (startyear < endyear)
-        error("startyear has to be < endyear. startyear=",startyear,". endyear=",endyear)
+        throw(ErrorException("startyear has to be < endyear. startyear=",startyear,". endyear=",endyear))
     end
 
     if typeof(indicators) == String
