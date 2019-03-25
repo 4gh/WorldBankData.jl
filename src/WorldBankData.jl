@@ -222,8 +222,6 @@ function parse_wdi(indicator::String, json::Array{Any,1}, startyear::Integer, en
     df[make_symbol(indicator)] = value
     df[:year] = date
 
-    dropmissing(df)
-
     checkyear(x) = (x >= startyear) & (x <= endyear)
     yind = map(checkyear, df[:year])
     df[yind, :]
