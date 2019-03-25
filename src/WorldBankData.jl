@@ -80,13 +80,13 @@ function parse_country(json::Array{Any,1})::DataFrame
 end
 
 function download_indicators(;verbose::Bool=false)::DataFrame
-    dat = download_parse_json("http://api.worldbank.org/indicators?per_page=25000&format=json", verbose=verbose)
+    dat = download_parse_json("https://api.worldbank.org/indicators?per_page=25000&format=json", verbose=verbose)
 
     parse_indicator(dat)
 end
 
 function download_countries(;verbose::Bool=false)::DataFrame
-    dat = download_parse_json("http://api.worldbank.org/countries/all?per_page=25000&format=json", verbose=verbose)
+    dat = download_parse_json("https://api.worldbank.org/countries/all?per_page=25000&format=json", verbose=verbose)
 
     parse_country(dat)
 end
@@ -231,13 +231,13 @@ end
 
 function wdi_download(indicator::String, country::Union{String,Array{String,1}}, startyear::Integer, endyear::Integer; verbose::Bool=false)::DataFrame
     if typeof(country) == String
-        url = string("http://api.worldbank.org/countries/", country, "/indicators/", indicator,
+        url = string("https://api.worldbank.org/countries/", country, "/indicators/", indicator,
                   "?date=", startyear,":", endyear, "&per_page=25000", "&format=json")
         json = [download_parse_json(url, verbose=verbose)[2]]
     elseif typeof(country) == Array{String,1}
         json = Any[]
         for c in country
-            url = string("http://api.worldbank.org/countries/", c, "/indicators/", indicator,
+            url = string("https://api.worldbank.org/countries/", c, "/indicators/", indicator,
                          "?date=", startyear,":", endyear, "&per_page=25000", "&format=json")
             append!(json,[download_parse_json(url, verbose=verbose)[2];])
         end
