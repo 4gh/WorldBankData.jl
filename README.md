@@ -27,7 +27,8 @@ US and Brazil:
 
 ```julia
 using WorldBankData
-df=wdi("NY.GNP.PCAP.CD", ["US","BR"])
+
+df = wdi("NY.GNP.PCAP.CD", ["US","BR"])
 ```
 
 The WDI indicator `NY.GNP.PCAP.CD` becomes the symbol `NY_GNP_PCAP_CD` in the
@@ -37,12 +38,13 @@ DataFrame, i.e. `.` gets replaced by `_`.
 
 ```julia
 using WorldBankData
-df=wdi(["NY.GNP.PCAP.CD","AG.LND.ARBL.HA.PC"], ["US","BR"], startyear=1980, endyear=2008, extra=true)
+
+df = wdi(["NY.GNP.PCAP.CD","AG.LND.ARBL.HA.PC"], ["US","BR"]; startyear = 1980, endyear = 2008, extra=true)
 ```
 
 This returns the GNI per capita and the arable land (hectares per
 person) for the time range 1980-2008 for the US and Brazil. It also
-attaches extra country information (the `extra=true` argument) like the
+attaches extra country information (the `extra = true` argument) like the
 capital, longitude, latitude, income range, etc.
 
 ## Arguments
@@ -50,7 +52,7 @@ capital, longitude, latitude, income range, etc.
 The `wdi` function has the following arguments:
 
 ```julia
-wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,Array{String,1}}, startyear::Integer=1800, endyear::Integer=3000; extra::Bool=false, verbose::Bool=false)
+wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,Array{String,1}}; startyear::Integer=1800, endyear::Integer=3000, extra::Bool=false, verbose::Bool=false)
 ```
 
 It needs a minimum of two arguments: the `indicators` (from the WDI
@@ -81,13 +83,13 @@ One can search for "countries" or "indicators" data.
 
 ```julia
 julia> using WorldBankData
-julia> res=search_wdi("countries","name",r"united"i)
-julia> res[:name]
+julia> res = search_wdi("countries", "name", r"united"i)
+julia> res.name
 3-element DataArray{UTF8String,1}:
  "United Arab Emirates"
  "United Kingdom"
  "United States"
-julia> res[:iso2c]
+julia> res.iso2c
 3-element DataArray{ASCIIString,1}:
  "AE"
  "GB"
@@ -98,7 +100,7 @@ julia> res[:iso2c]
 
 ```julia
 julia> using WorldBankData
-julia> res=search_wdi("indicators","description",r"gross national expenditure"i)
+julia> res = search_wdi("indicators", "description", r"gross national expenditure"i)
 6x5 DataFrame
 |-------|---------------------|------------|---------|
 | Col # | Name                | Type       | Missing |
@@ -108,7 +110,7 @@ julia> res=search_wdi("indicators","description",r"gross national expenditure"i)
 | 4     | source_database     | UTF8String | 0       |
 | 5     | source_organization | UTF8String | 0       |
 
-julia> res[:name]
+julia> res.name
 6-element DataArray{UTF8String,1}:
  "Gross national expenditure deflator (base year varies by country)"
  "Gross national expenditure (current US\$)"
@@ -117,7 +119,7 @@ julia> res[:name]
  "Gross national expenditure (constant LCU)"
  "Gross national expenditure (% of GDP)"
 
-julia> res[:indicator]
+julia> res.indicator
 6-element DataArray{UTF8String,1}:
  "NE.DAB.DEFL.ZS"
  "NE.DAB.TOTL.CD"
@@ -159,20 +161,20 @@ insensitive.
 ### Examples of country searches
 
 ```julia
-julia> search_wdi("countries","iso2c",r"TZ"i)
+julia> search_wdi("countries", "iso2c", r"TZ"i)
 1x9 DataFrame
 |-------|---------|------------|-------|-------|----------|---------|-----------|----------|----------------------------------------|
 | Row # | capital | income     | iso2c | iso3c | latitude | lending | longitude | name     | region                                 |
 | 1     | Dodoma  | Low income | TZ    | TZA   | -6.17486 | IDA     | 35.7382   | Tanzania | Sub-Saharan Africa (all income levels) |
 
 
-julia> search_wdi("countries","income",r"upper middle"i)
+julia> search_wdi("countries", "income", r"upper middle"i)
 ...
 
-julia> search_wdi("countries","region",r"Latin America"i)
+julia> search_wdi("countries", "region", r"Latin America"i)
 ...
 
-julia> search_wdi("countries","capital",r"^Ka"i)
+julia> search_wdi("countries", "capital", r"^Ka"i)
 3x9 DataFrame
 |-------|-----------|------------|-------|-------|----------|---------|-----------|-------------|----------------------------------------|
 | Row # | capital   | income     | iso2c | iso3c | latitude | lending | longitude | name        | region                                 |
@@ -180,7 +182,7 @@ julia> search_wdi("countries","capital",r"^Ka"i)
 | 2     | Kathmandu | Low income | NP    | NPL   | 27.6939  | IDA     | 85.3157   | Nepal       | South Asia                             |
 | 3     | Kampala   | Low income | UG    | UGA   | 0.314269 | IDA     | 32.5729   | Uganda      | Sub-Saharan Africa (all income levels) |
 
-julia> search_wdi("countries","lending",r"IBRD"i)
+julia> search_wdi("countries", "lending", r"IBRD"i)
 ...
 
 ```
@@ -188,13 +190,13 @@ julia> search_wdi("countries","lending",r"IBRD"i)
 ### Examples of indicator searches
 
 ```julia
-julia> search_wdi("indicators","name",r"gross national expenditure"i)
+julia> search_wdi("indicators", "name", r"gross national expenditure"i)
 ...
-julia> search_wdi("indicators","description",r"gross national expenditure"i)
+julia> search_wdi("indicators", "description", r"gross national expenditure"i)
 ...
-julia> search_wdi("indicators","source_database",r"Sustainable"i)
+julia> search_wdi("indicators", "source_database", r"Sustainable"i)
 ...
-julia> search_wdi("indicators","source_organization",r"Global Partnership"i)
+julia> search_wdi("indicators", "source_organization", r"Global Partnership"i)
 
 ```
 
@@ -203,8 +205,8 @@ julia> search_wdi("indicators","source_organization",r"Global Partnership"i)
 ### Extracting country data from results
 
 ```julia
-df=wdi("NY.GNP.PCAP.CD", ["US","BR"], 1980, 2012, extra=true)
-us_gnp=df[df[:iso2c] .== "US",:]
+df = wdi("NY.GNP.PCAP.CD", ["US","BR"]; startyear = 1980, endyear = 2012, extra = true)
+us_gnp = df[df.iso2c .== "US", :]
 ```
 
 ### Year format
@@ -218,8 +220,8 @@ You can easily convert this to a Date series:
 using WorldBankData
 using Dates
 
-df=wdi("AG.LND.ARBL.HA.PC", "US", 1900, 2011)
-df[:year] = map(Date, df[:year])
+df = wdi("AG.LND.ARBL.HA.PC", "US", startyear = 1900, endyear = 2011)
+df.year = Date.(df.year)
 ```
 
 ### Plotting
@@ -231,27 +233,9 @@ Install the [Plots.jl](https://github.com/JuliaPlots/Plots.jl) package with
 using WorldBankData
 using Plots
 
-df=wdi("AG.LND.ARBL.HA.PC", "US", 1980, 2010)
+df = wdi("AG.LND.ARBL.HA.PC", "US"; startyear = 1980, endyear = 2010)
 
-plot(df[:year], df[:AG_LND_ARBL_HA_PC])
-```
-
-### Empty/Missing results
-
-`wdi` will return an empty DataFrame without warning if there is no data:
-```julia
-julia> dfAS=wdi("EN.ATM.CO2E.KT", "AS")
-0x4 DataFrame
-```
-
-You can check for this with `size(dfAS)[1]==0`.
-
-It will return a DataFrame for the cases where it has data, i.e.
-
-```julia
-julia> df=wdi("EN.ATM.CO2E.KT", ["AS","US"])
-51x4 DataFrame
-...
+plot(df.year, df.AG_LND_ARBL_HA_PC)
 ```
 
 ### Cache
@@ -307,7 +291,8 @@ function update_us_gnp_per_cap()
     df = wdi("NY.GNP.PCAP.CD", "US")
     CSV.write("us_gnp.csv",df)
 end
-df=CSV.read("us_gnp.csv")
+
+df = CSV.read("us_gnp.csv")
 ```
 one then runs the `update_us_gnp_per_cap()` function only when needed.
 

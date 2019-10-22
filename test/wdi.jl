@@ -18,7 +18,7 @@ us_gnp_data = Any[  Dict( "total"=>23,"per_page"=>"25000","pages"=>1,"page"=>1 )
 
 us_gnp = WorldBankData.parse_wdi("NY.GNP.PCAP.CD",us_gnp_data[2],2006,2012)
 
-@test us_gnp[:year] == Float64[2012, 2011, 2010, 2009, 2008, 2007, 2006]
-@test us_gnp[:NY_GNP_PCAP_CD] == Float64[52340, 50650, 48960, 48040, 49350, 48640, 48080]
+@test us_gnp[!, :year] == Float64[2012, 2011, 2010, 2009, 2008, 2007, 2006]
+@test us_gnp[!, :NY_GNP_PCAP_CD] == Float64[52340, 50650, 48960, 48040, 49350, 48640, 48080]
 
 end

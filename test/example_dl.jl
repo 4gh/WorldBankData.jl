@@ -23,7 +23,8 @@ end
 function try_download(cntr=5)
     dfweb = ""
     while cntr > 0
-        dfweb = wdi(["NY.GNP.PCAP.CD", "AG.LND.ARBL.HA.PC"], ["US", "BR"], 1980, 2008, extra=true, verbose=true)
+        dfweb = wdi(["NY.GNP.PCAP.CD", "AG.LND.ARBL.HA.PC"], ["US", "BR"];
+                    startyear = 1980, endyear = 2008, extra=true, verbose=true)
         if size(dfweb)[1] != 0
             break
         end
@@ -38,13 +39,13 @@ end
 
 # data contains NA which breaks == check
 function rm_na(df)
-    df[map(ismissing, df[:NY_GNP_PCAP_CD]), :NY_GNP_PCAP_CD]=-123456
-    df[map(ismissing, df[:AG_LND_ARBL_HA_PC]), :AG_LND_ARBL_HA_PC]=-123456
+    df[map(ismissing, df[!, :NY_GNP_PCAP_CD]), :NY_GNP_PCAP_CD] = -123456
+    df[map(ismissing, df[!, :AG_LND_ARBL_HA_PC]), :AG_LND_ARBL_HA_PC] = -123456
 end
 
 dfweb = try_download()
 
-@test dfweb[:year] == refdf[:year]
+@test dfweb[!, :year] == refdf[!, :year]
 
 rm_na(dfweb)
 rm_na(refdf)
