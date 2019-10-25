@@ -129,13 +129,9 @@ end
 make_symbol(x::String) =  Symbol(replace(x, "." => "_"))
 
 # return boolean array of matching entries
-<<<<<<< HEAD
 regex_match(df::Array{String,1}, regex::Regex)::Array{Bool, 1} = map(x -> occursin(regex, x), df)
 
 df_match(df::AbstractDataFrame, entry::String, regex::Regex) = df[regex_match(df[!, make_symbol(entry)], regex),:]
-=======
-regex_match(df::Array{String,1}, regex::Regex) = map(x -> occursin(regex, x), df)
->>>>>>> 5f8ed7b3b8edbbde1b5b9535a41fe10bdafd5360
 
 function df_match(df::AbstractDataFrame, entry::String, regex::Regex)
     return df[regex_match(df[!, make_symbol(entry)], regex), :]
@@ -236,17 +232,12 @@ function wdi_download(indicator::String,
     if typeof(country) == String
         url = string("http://api.worldbank.org/countries/", country, "/indicators/", indicator,
                   "?date=", startyear,":", endyear, "&per_page=25000", "&format=json")
-<<<<<<< HEAD
         json_data = download_parse_json(url, verbose=verbose)[2]
-=======
-        json_data = [download_parse_json(url, verbose=verbose)[2]]
->>>>>>> 5f8ed7b3b8edbbde1b5b9535a41fe10bdafd5360
     elseif typeof(country) == Array{String,1}
         json_data = Any[]
         for c in country
 
             url = string("http://api.worldbank.org/countries/", c, "/indicators/", indicator,
-<<<<<<< HEAD
                          "?date=", startyear,":", endyear, "&per_page=25000", "&format=json")
 
             data_now = download_parse_json(url, verbose = verbose)
@@ -261,18 +252,6 @@ function wdi_download(indicator::String,
                 else
                     append!(json_data, data_now)
                 end
-=======
-                "?date=", startyear,":", endyear, "&per_page=25000", "&format=json"
-            )
-
-            data_now = [download_parse_json(url, verbose = verbose)[2]; ]
-
-            if typeof(data_now) == Vector{Nothing}
-                verbose && println("No data found for country ",c)
-                nothing
-            else
-                append!(json_data, data_now)
->>>>>>> 5f8ed7b3b8edbbde1b5b9535a41fe10bdafd5360
             end
         end
     end
@@ -325,18 +304,8 @@ df = wdi("NY.GNP.PCAP.CD", ["US","BR"], 1980, 2012, extra=true)
 df = wdi(["NY.GNP.PCAP.CD", "AG.LND.ARBL.HA.PC"], ["US","BR"], 1980, 2012, extra=true)
 ```
 """
-<<<<<<< HEAD
 function wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,Array{String,1}};
      startyear::Integer=1800, endyear::Integer=3000, extra::Bool=false, verbose::Bool=false)::DataFrame
-=======
-
-function wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,Array{String,1}};
-            startyear::Integer = 1800,
-            endyear::Integer = 3000,
-            extra::Bool = false,
-            verbose::Bool = false)
-
->>>>>>> 5f8ed7b3b8edbbde1b5b9535a41fe10bdafd5360
     if countries == "all"
         countries = all_countries
     end
