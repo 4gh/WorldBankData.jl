@@ -22,7 +22,7 @@ dfref = DataFrame(iso2c=["US" for _ in range(1, length=8)],
 #│ 5   │ US    │ United States │ 26480.0        │ 1993.0 │
 #│ 6   │ US    │ United States │ 25780.0        │ 1992.0 │
 #│ 7   │ US    │ United States │ 24370.0        │ 1991.0 │
-#│ 8   │ US    │ United States │ 24150.0        │ 1990.0 
+#│ 8   │ US    │ United States │ 24150.0        │ 1990.0
 
 testjson = JSON.parse(testjsonstr)[2]
 

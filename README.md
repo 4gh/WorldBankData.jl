@@ -192,9 +192,9 @@ julia> search_wdi("indicators","name",r"gross national expenditure"i)
 ...
 julia> search_wdi("indicators","description",r"gross national expenditure"i)
 ...
-julia> search_wdi("indicators","source_database",r"Sustainable"i)
+julia> search_wdi("indicators", "source_database", r"Sustainable"i)
 ...
-julia> search_wdi("indicators","source_organization",r"Global Partnership"i)
+julia> search_wdi("indicators", "source_organization", r"Global Partnership"i)
 
 ```
 
@@ -203,8 +203,8 @@ julia> search_wdi("indicators","source_organization",r"Global Partnership"i)
 ### Extracting country data from results
 
 ```julia
-df=wdi("NY.GNP.PCAP.CD", ["US","BR"], 1980, 2012, extra=true)
-us_gnp=df[df[:iso2c] .== "US",:]
+df = wdi("NY.GNP.PCAP.CD", ["US","BR"]; startyear = 1980, endyear = 2012, extra = true)
+us_gnp = df[df.iso2c .== "US", :]
 ```
 
 ### Year format
@@ -218,8 +218,8 @@ You can easily convert this to a Date series:
 using WorldBankData
 using Dates
 
-df=wdi("AG.LND.ARBL.HA.PC", "US", 1900, 2011)
-df[:year] = map(Date, df[:year])
+df = wdi("AG.LND.ARBL.HA.PC", "US", startyear = 1900, endyear = 2011)
+df.year = Date.(df.year)
 ```
 
 ### Plotting
@@ -231,27 +231,9 @@ Install the [Plots.jl](https://github.com/JuliaPlots/Plots.jl) package with
 using WorldBankData
 using Plots
 
-df=wdi("AG.LND.ARBL.HA.PC", "US", 1980, 2010)
+df = wdi("AG.LND.ARBL.HA.PC", "US"; startyear = 1980, endyear = 2010)
 
-plot(df[:year], df[:AG_LND_ARBL_HA_PC])
-```
-
-### Empty/Missing results
-
-`wdi` will return an empty DataFrame without warning if there is no data:
-```julia
-julia> dfAS=wdi("EN.ATM.CO2E.KT", "AS")
-0x4 DataFrame
-```
-
-You can check for this with `size(dfAS)[1]==0`.
-
-It will return a DataFrame for the cases where it has data, i.e.
-
-```julia
-julia> df=wdi("EN.ATM.CO2E.KT", ["AS","US"])
-51x4 DataFrame
-...
+plot(df.year, df.AG_LND_ARBL_HA_PC)
 ```
 
 ### Cache
@@ -307,7 +289,8 @@ function update_us_gnp_per_cap()
     df = wdi("NY.GNP.PCAP.CD", "US")
     CSV.write("us_gnp.csv",df)
 end
-df=CSV.read("us_gnp.csv")
+
+df = CSV.read("us_gnp.csv")
 ```
 one then runs the `update_us_gnp_per_cap()` function only when needed.
 

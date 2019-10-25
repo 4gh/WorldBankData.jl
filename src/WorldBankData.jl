@@ -145,7 +145,7 @@ end
 # return boolean array of matching entries
 regex_match(df::Array{String,1}, regex::Regex)::Array{Bool, 1} = map(x -> occursin(regex, x), df)
 
-df_match(df::AbstractDataFrame, entry::String, regex::Regex)::DataFrame = df[regex_match(df[make_symbol(entry)], regex),:]
+df_match(df::AbstractDataFrame, entry::String, regex::Regex) = df[regex_match(df[!, make_symbol(entry)], regex),:]
 
 function country_match(entry::String,regex::Regex)::DataFrame
     df = get_countries()
@@ -234,31 +234,43 @@ function parse_wdi(indicator::String, json::Array{Any,1}, startyear::Integer, en
     date = convert_a2f(date)
 
     df = DataFrame(iso2c = country_id, country = country_name)
-    df[make_symbol(indicator)] = value
-    df[:year] = date
+    df[!, make_symbol(indicator)] = value
+    df[!, :year] = date
 
     dropmissing(df)
 
-    checkyear(x) = (x >= startyear) & (x <= endyear)
-    yind = map(checkyear,df[:year])
-    df[yind, :]
+    return df[(df.year .>= startyear) .& (df.year .<= endyear), :]
 end
 
 function wdi_download(indicator::String, country::Union{String,Array{String,1}}, startyear::Integer, endyear::Integer; verbose::Bool=false)::DataFrame
     if typeof(country) == String
         url = string("http://api.worldbank.org/countries/", country, "/indicators/", indicator,
                   "?date=", startyear,":", endyear, "&per_page=25000", "&format=json")
-        json = [download_parse_json(url, verbose=verbose)[2]]
+        json_data = download_parse_json(url, verbose=verbose)[2]
     elseif typeof(country) == Array{String,1}
-        json = Any[]
+        json_data = Any[]
         for c in country
+
             url = string("http://api.worldbank.org/countries/", c, "/indicators/", indicator,
                          "?date=", startyear,":", endyear, "&per_page=25000", "&format=json")
-            append!(json,[download_parse_json(url, verbose=verbose)[2];])
+
+            data_now = download_parse_json(url, verbose = verbose)
+
+            if !("message" in keys(data_now[1]))
+
+                data_now = download_parse_json(url, verbose = false)[2]
+
+                if typeof(data_now) == Nothing
+                    verbose && println("No data found for country ",c)
+                    nothing
+                else
+                    append!(json_data, data_now)
+                end
+            end
         end
     end
 
-    parse_wdi(indicator, json, startyear, endyear)
+    return parse_wdi(indicator, json_data, startyear, endyear)
 end
 
 all_countries = ["AW", "AF", "A9", "AO", "AL", "AD", "L5", "1A", "AE", "AR", "AM", "AS", "AG", "AU", "AT", "AZ", "BI", "B4", "B7", "BE", "BJ", "BF", "BD", "BG", "B1", "BH", "BS", "BA", "B2", "BY", "BZ", "B3", "BM", "BO", "BR", "BB", "BN", "B6", "BT", "BW", "C9", "CF", "CA", "C4", "B8", "C5", "CH", "JG", "CL", "CN", "CI", "C6", "C7", "CM", "CD", "CG", "CO", "KM", "CV", "CR", "C8", "S3", "CU", "CW", "KY", "CY", "CZ", "D4", "D7", "DE", "D8", "DJ", "D2", "DM", "D3", "D9", "DK", "N6", "DO", "D5", "F6", "D6", "6D", "DZ", "4E", "V2", "Z4", "7E", "Z7", "EC", "EG", "XC", "ER", "ES", "EE", "ET", "EU", "F1", "FI", "FJ", "FR", "FO", "FM", "6F", "GA", "GB", "GE", "GH", "GI", "GN", "GM", "GW", "GQ", "GR", "GD", "GL", "GT", "GU", "GY", "XD", "HK", "HN", "XE", "HR", "HT", "HU", "ZB", "XF", "ZT", "XG", "XH", "ID", "XI", "IM", "IN", "XY", "IE", "IR", "IQ", "IS", "IL", "IT", "JM", "JO", "JP", "KZ", "KE", "KG", "KH", "KI", "KN", "KR", "KW", "XJ", "LA", "LB", "LR", "LY", "LC", "ZJ", "L4", "XL", "XM", "LI", "LK", "XN", "XO", "LS", "V3", "LT", "LU", "LV", "MO", "MF", "MA", "L6", "MC", "MD", "M1", "MG", "MV", "ZQ", "MX", "MH", "XP", "MK", "ML", "MT", "MM", "XQ", "ME", "MN", "MP", "MZ", "MR", "MU", "MW", "MY", "XU", "M2", "NA", "NC", "NE", "NG", "NI", "NL", "6L", "NO", "NP", "6X", "NR", "6N", "NZ", "OE", "OM", "S4", "PK", "PA", "PE", "PH", "PW", "PG", "PL", "V1", "PR", "KP", "PT", "PY", "PS", "S2", "V4", "PF", "QA", "RO", "R6", "O6", "RU", "RW", "8S", "SA", "L7", "SD", "SN", "SG", "SB", "SL", "SV", "SM", "SO", "RS", "ZF", "SS", "ZG", "S1", "ST", "SR", "SK", "SI", "SE", "SZ", "SX", "A4", "SC", "SY", "TC", "TD", "T4", "T7", "TG", "TH", "TJ", "TM", "T2", "TL", "T3", "TO", "T5", "T6", "TT", "TN", "TR", "TV", "TW", "TZ", "UG", "UA", "XT", "UY", "US", "UZ", "VC", "VE", "VG", "VI", "VN", "VU", "1W", "WS", "XK", "A5", "YE", "ZA", "ZM", "ZW"]
@@ -285,7 +297,8 @@ df = wdi("NY.GNP.PCAP.CD", ["US","BR"], 1980, 2012, extra=true)
 df = wdi(["NY.GNP.PCAP.CD", "AG.LND.ARBL.HA.PC"], ["US","BR"], 1980, 2012, extra=true)
 ```
 """
-function wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,Array{String,1}}, startyear::Integer=1800, endyear::Integer=3000; extra::Bool=false, verbose::Bool=false)::DataFrame
+function wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,Array{String,1}};
+     startyear::Integer=1800, endyear::Integer=3000, extra::Bool=false, verbose::Bool=false)::DataFrame
     if countries == "all"
         countries = all_countries
     end
