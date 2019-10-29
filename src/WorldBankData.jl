@@ -205,14 +205,19 @@ function search_wdi(data::String, entry::String, regx::Regex)::DataFrame
     end
 end
 
-# Function to replace Nothing type with "NA" string
-clean_entry(x::Union{AbstractString, Nothing}) = typeof(x) == Nothing ? "NA" : x
+function clean_entry(x::Union{AbstractString, Nothing})
+    if typeof(x) == Nothing
+        return "NA"
+    else
+        return x
+    end
+end
 
 function clean_append!(vals::Union{Array{String,1},Array{String,1}}, val::Union{String,String, Nothing})
     append!(vals,[clean_entry(val)])
 end
 
-function parse_wdi(indicator::String, json::Array{Any,1}, startyear::Integer, endyear::Integer)
+function parse_wdi(indicator::String, json::Array{Any,1}, startyear::Integer, endyear::Integer)::DataFrame
     country_id = String[]
     country_name = String[]
     value = String[]
