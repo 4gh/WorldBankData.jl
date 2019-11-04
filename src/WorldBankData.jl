@@ -145,7 +145,7 @@ end
 # return boolean array of matching entries
 regex_match(df::Array{String,1}, regex::Regex)::Array{Bool, 1} = map(x -> occursin(regex, x), df)
 
-df_match(df::AbstractDataFrame, entry::String, regex::Regex)::DataFrame = df[regex_match(df[make_symbol(entry)], regex),:]
+df_match(df::AbstractDataFrame, entry::String, regex::Regex)::DataFrame = df[regex_match(df[!, make_symbol(entry)], regex),:]
 
 function country_match(entry::String,regex::Regex)::DataFrame
     df = get_countries()
