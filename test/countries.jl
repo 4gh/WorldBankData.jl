@@ -15,7 +15,7 @@ country_data = Any[ Dict("total"=>4,"per_page"=>"25000","pages"=>1,"page"=>1),
 
 df_country = WorldBankData.parse_country(country_data)
 
-@test df_country[:name] == String["Andorra", "Arab World", "United Arab Emirates", "Argentina"]
-@test df_country[:iso2c] == String["AD", "1A", "AE", "AR"]
+@test df_country[!, :name] == String["Andorra", "Arab World", "United Arab Emirates", "Argentina"]
+@test df_country[!, :iso2c] == String["AD", "1A", "AE", "AR"]
 
 end

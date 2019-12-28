@@ -130,7 +130,7 @@ function make_symbol(x::String)::Symbol
     Symbol(replace(x, "." => "_"))
 end
 
-df_match(df::AbstractDataFrame, entry::String, regex::Regex)::DataFrame = df[occursin.(Ref(regex), df[make_symbol(entry)]),:]
+df_match(df::AbstractDataFrame, entry::String, regex::Regex)::DataFrame = df[occursin.(Ref(regex), df[!, make_symbol(entry)]),:]
 
 function country_match(entry::String,regex::Regex)::DataFrame
     df = get_countries()
@@ -219,11 +219,11 @@ function parse_wdi(indicator::String, json::Array{Any,1}, startyear::Integer, en
     date = tofloat.(date)
 
     df = DataFrame(iso2c = country_id, country = country_name)
-    df[make_symbol(indicator)] = value
-    df[:year] = date
+    df[!, make_symbol(indicator)] = value
+    df[!, :year] = date
 
     checkyear(x) = (x >= startyear) & (x <= endyear)
-    yind = map(checkyear, df[:year])
+    yind = map(checkyear, df[!, :year])
     df[yind, :]
 end
 
