@@ -1,15 +1,12 @@
 using Test
 using WorldBankData
 
-# example_dl.jl test downloads test data from web site.
+include("countries.jl")
+include("indicators.jl")
+include("wdi.jl")
+include("search_wdi.jl")
+include("jsonwdi.jl")
+
+# example_dl.jl test downloads data from the world bank web site.
 # The data gets revised occasionally which breaks the test.
-# my_tests = ["countries.jl", "indicators.jl", "wdi.jl", "search_wdi.jl", "jsonwdi.jl", "example_dl.jl"]
-
-my_tests = ["countries.jl", "indicators.jl", "wdi.jl", "search_wdi.jl", "jsonwdi.jl"]
-
-println("Running tests:")
-
-for my_test in my_tests
-    println(" * $(my_test)")
-    include(my_test)
-end
+#include("example_dl.jl")
