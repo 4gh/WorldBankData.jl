@@ -43,7 +43,6 @@ df = wdi("NY.GNP.PCAP.CD", ["US","BR"])
 │ 2   │ BR     │ Brazil        │ missing        │ 1961.0  │
 │ 3   │ BR     │ Brazil        │ missing        │ 1962.0  │
 ⋮
-│ 117 │ US     │ United States │ 57160.0        │ 2016.0  │
 │ 118 │ US     │ United States │ 59030.0        │ 2017.0  │
 │ 119 │ US     │ United States │ 63080.0        │ 2018.0  │
 │ 120 │ US     │ United States │ missing        │ 2019.0  │
@@ -66,8 +65,6 @@ df = wdi(["NY.GNP.PCAP.CD","AG.LND.ARBL.HA.PC"], ["US","BR"], 1980, 2008, extra=
 │ 2   │ BR      │ Brazil        │ 2090.0         │ 1981.0   │ 0.369021          │ BRA    │ Brazil        │ Latin America & Caribbean  │ Brasilia        │ -47.9292  │ -15.7801 │ Upper middle income │ IBRD           │
 │ 3   │ BR      │ Brazil        │ 2010.0         │ 1982.0   │ 0.371546          │ BRA    │ Brazil        │ Latin America & Caribbean  │ Brasilia        │ -47.9292  │ -15.7801 │ Upper middle income │ IBRD           │
 ⋮
-│ 55  │ US      │ United States │ 46190.0        │ 2005.0   │ 0.558733          │ USA    │ United States │ North America              │ Washington D.C. │ -77.032   │ 38.8895  │ High income         │ Not classified │
-│ 56  │ US      │ United States │ 47880.0        │ 2006.0   │ 0.537708          │ USA    │ United States │ North America              │ Washington D.C. │ -77.032   │ 38.8895  │ High income         │ Not classified │
 │ 57  │ US      │ United States │ 48500.0        │ 2007.0   │ 0.537395          │ USA    │ United States │ North America              │ Washington D.C. │ -77.032   │ 38.8895  │ High income         │ Not classified │
 │ 58  │ US      │ United States │ 48980.0        │ 2008.0   │ 0.532114          │ USA    │ United States │ North America              │ Washington D.C. │ -77.032   │ 38.8895  │ High income         │ Not classified │
 ```
@@ -284,24 +281,10 @@ julia> df = wdi("EN.ATM.CO2E.KT", ["AS","US"])
 ├─────┼────────┼────────────────┼────────────────┼─────────┤
 │ 1   │ AS     │ American Samoa │ missing        │ 1960.0  │
 │ 2   │ AS     │ American Samoa │ missing        │ 1961.0  │
-│ 3   │ AS     │ American Samoa │ missing        │ 1962.0  │
-│ 4   │ AS     │ American Samoa │ missing        │ 1963.0  │
 ...
-│ 105 │ US     │ United States  │ 5.75608e6      │ 2004.0  │
-│ 106 │ US     │ United States  │ 5.78973e6      │ 2005.0  │
-│ 107 │ US     │ United States  │ 5.69729e6      │ 2006.0  │
-│ 108 │ US     │ United States  │ 5.78903e6      │ 2007.0  │
-│ 109 │ US     │ United States  │ 5.61411e6      │ 2008.0  │
-│ 110 │ US     │ United States  │ 5.26351e6      │ 2009.0  │
-│ 111 │ US     │ United States  │ 5.39553e6      │ 2010.0  │
-│ 112 │ US     │ United States  │ 5.28968e6      │ 2011.0  │
-│ 113 │ US     │ United States  │ 5.11944e6      │ 2012.0  │
 │ 114 │ US     │ United States  │ 5.15916e6      │ 2013.0  │
 │ 115 │ US     │ United States  │ 5.25428e6      │ 2014.0  │
 │ 116 │ US     │ United States  │ missing        │ 2015.0  │
-│ 117 │ US     │ United States  │ missing        │ 2016.0  │
-│ 118 │ US     │ United States  │ missing        │ 2017.0  │
-│ 119 │ US     │ United States  │ missing        │ 2018.0  │
 │ 120 │ US     │ United States  │ missing        │ 2019.0  │
 ...
 ```
