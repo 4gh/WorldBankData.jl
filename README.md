@@ -15,7 +15,7 @@ It follows roughly the
 
 ## Build Status
 
-[![GitHub Build Status](https://github.com/4gh/WorldBankData.jl/actions?query=workflow%3A%22WorldBankData.jl+Continous+Integration%22)](https://github.com/4gh/WorldBankData.jl/workflows/WorldBankData.jl%20Continous%20Integration/badge.svg)
+[![GitHub Build Status](https://github.com/4gh/WorldBankData.jl/workflows/WorldBankData.jl%20Continous%20Integration/badge.svg)](https://github.com/4gh/WorldBankData.jl/actions?query=workflow%3A%22WorldBankData.jl+Continous+Integration%22)
 
 [![Travis CI Build Status](https://travis-ci.org/4gh/WorldBankData.jl.png)](https://travis-ci.org/4gh/WorldBankData.jl)
 
