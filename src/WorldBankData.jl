@@ -10,7 +10,7 @@ using DataFrames
 export wdi, search_wdi
 
 
-function download_parse_json(url::String; verbose::Bool=false)
+function download_parse_json(url::String; verbose::Bool = false)
     if verbose
         println("download: ", url)
     end
@@ -30,9 +30,9 @@ function parse_indicator(json::Array{Any,1})::DataFrame
     source_organization_val = String[]
 
     for d in json[2]
-        append!(indicator_val,[d["id"]])
-        append!(name_val,[d["name"]])
-        append!(description_val,[d["sourceNote"]])
+        append!(indicator_val, [d["id"]])
+        append!(name_val, [d["name"]])
+        append!(description_val, [d["sourceNote"]])
         append!(source_database_val, [d["source"]["value"]])
         append!(source_organization_val, [d["sourceOrganization"]])
     end
@@ -42,9 +42,9 @@ function parse_indicator(json::Array{Any,1})::DataFrame
               source_organization = source_organization_val)
 end
 
-function tofloat(f::AbstractString)::Union{Missing, Float64}
-     x = tryparse(Float64, f)
-     x isa Nothing ? missing : x
+function tofloat(f::AbstractString)::Union{Missing,Float64}
+    x = tryparse(Float64, f)
+    x isa Nothing ? missing : x
 end
 
 # convert country json to DataFrame
@@ -60,15 +60,15 @@ function parse_country(json::Array{Any,1})::DataFrame
     lending_val = String[]
 
     for d in json[2]
-        append!(iso3c_val,[d["id"]])
-        append!(iso2c_val,[d["iso2Code"]])
-        append!(name_val,[d["name"]])
-        append!(region_val,[d["region"]["value"]])
-        append!(capital_val,[d["capitalCity"]])
-        append!(longitude_val,[d["longitude"]])
-        append!(latitude_val,[d["latitude"]])
-        append!(income_val,[d["incomeLevel"]["value"]])
-        append!(lending_val,[d["lendingType"]["value"]])
+        append!(iso3c_val, [d["id"]])
+        append!(iso2c_val, [d["iso2Code"]])
+        append!(name_val, [d["name"]])
+        append!(region_val, [d["region"]["value"]])
+        append!(capital_val, [d["capitalCity"]])
+        append!(longitude_val, [d["longitude"]])
+        append!(latitude_val, [d["latitude"]])
+        append!(income_val, [d["incomeLevel"]["value"]])
+        append!(lending_val, [d["lendingType"]["value"]])
     end
 
     longitude_val = tofloat.(longitude_val)
@@ -79,14 +79,14 @@ function parse_country(json::Array{Any,1})::DataFrame
               latitude = latitude_val, income = income_val, lending = lending_val)
 end
 
-function download_indicators(;verbose::Bool=false)::DataFrame
-    dat = download_parse_json("https://api.worldbank.org/indicators?per_page=25000&format=json", verbose=verbose)
+function download_indicators(;verbose::Bool = false)::DataFrame
+    dat = download_parse_json("https://api.worldbank.org/indicators?per_page=25000&format=json", verbose = verbose)
 
     parse_indicator(dat)
 end
 
-function download_countries(;verbose::Bool=false)::DataFrame
-    dat = download_parse_json("https://api.worldbank.org/countries/all?per_page=25000&format=json", verbose=verbose)
+function download_countries(;verbose::Bool = false)::DataFrame
+    dat = download_parse_json("https://api.worldbank.org/countries/all?per_page=25000&format=json", verbose = verbose)
 
     parse_country(dat)
 end
@@ -110,16 +110,16 @@ function set_indicator_cache(df::AbstractDataFrame)
     global indicator_cache = df
 end
 
-function get_countries(;verbose::Bool=false)
+function get_countries(;verbose::Bool = false)
     if country_cache == false
-        set_country_cache(download_countries(verbose=verbose))
+        set_country_cache(download_countries(verbose = verbose))
     end
     country_cache
 end
 
-function get_indicators(;verbose::Bool=false)
+function get_indicators(;verbose::Bool = false)
     if indicator_cache == false
-        set_indicator_cache(download_indicators(verbose=verbose))
+        set_indicator_cache(download_indicators(verbose = verbose))
     end
     indicator_cache
 end
@@ -132,30 +132,30 @@ end
 
 df_match(df::AbstractDataFrame, entry::String, regex::Regex)::DataFrame = df[occursin.(Ref(regex), df[!, make_symbol(entry)]),:]
 
-function country_match(entry::String,regex::Regex)::DataFrame
+function country_match(entry::String, regex::Regex)::DataFrame
     df = get_countries()
     df_match(df, entry, regex)
 end
 
-function indicator_match(entry::String,regex::Regex)::DataFrame
+function indicator_match(entry::String, regex::Regex)::DataFrame
     df = get_indicators()
-    df_match(df,entry,regex)
+    df_match(df, entry, regex)
 end
 
-function search_countries(entry::String,regx::Regex)::DataFrame
+function search_countries(entry::String, regx::Regex)::DataFrame
     entries = ["name","region","capital","iso2c","iso3c","income","lending"]
     if !(entry in entries)
-        throw(ErrorException("unsupported country entry: \"",entry,"\". supported are:\n",entries))
+        throw(ErrorException("unsupported country entry: \"", entry, "\". supported are:\n", entries))
     end
-    country_match(entry,regx)
+    country_match(entry, regx)
 end
 
 function search_indicators(entry::String, regx::Regex)::DataFrame
     entries = ["name","description","topics","source_database","source_organization"]
     if !(entry in entries)
-        throw(ErrorException("unsupported indicator entry: \"",entry,"\". supported are\n",entries))
+        throw(ErrorException("unsupported indicator entry: \"", entry, "\". supported are\n", entries))
     end
-    indicator_match(entry,regx)
+    indicator_match(entry, regx)
 end
 
 
@@ -190,7 +190,7 @@ function search_wdi(data::String, entry::String, regx::Regex)::DataFrame
     end
 end
 
-function clean_entry(x::Union{AbstractString, Nothing})
+function clean_entry(x::Union{AbstractString,Nothing})
     if typeof(x) == Nothing
         return "NA"
     else
@@ -198,8 +198,8 @@ function clean_entry(x::Union{AbstractString, Nothing})
     end
 end
 
-function clean_append!(vals::Union{Array{String,1},Array{String,1}}, val::Union{String,String, Nothing})
-    append!(vals,[clean_entry(val)])
+function clean_append!(vals::Union{Array{String,1},Array{String,1}}, val::Union{String,String,Nothing})
+    append!(vals, [clean_entry(val)])
 end
 
 function parse_wdi(indicator::String, json::Array{Any,1}, startyear::Integer, endyear::Integer)::DataFrame
@@ -209,10 +209,10 @@ function parse_wdi(indicator::String, json::Array{Any,1}, startyear::Integer, en
     date = String[]
 
     for d in json
-        clean_append!(country_id,d["country"]["id"])
-        clean_append!(country_name,d["country"]["value"])
-        clean_append!(value,d["value"])
-        clean_append!(date,d["date"])
+        clean_append!(country_id, d["country"]["id"])
+        clean_append!(country_name, d["country"]["value"])
+        clean_append!(value, d["value"])
+        clean_append!(date, d["date"])
     end
 
     value = tofloat.(value)
@@ -227,17 +227,17 @@ function parse_wdi(indicator::String, json::Array{Any,1}, startyear::Integer, en
     df[yind, :]
 end
 
-function wdi_download(indicator::String, country::Union{String,Array{String,1}}, startyear::Integer, endyear::Integer; verbose::Bool=false)::DataFrame
+function wdi_download(indicator::String, country::Union{String,Array{String,1}}, startyear::Integer, endyear::Integer; verbose::Bool = false)::DataFrame
     if typeof(country) == String
         url = string("https://api.worldbank.org/countries/", country, "/indicators/", indicator,
-                  "?date=", startyear,":", endyear, "&per_page=25000", "&format=json")
-        json = [download_parse_json(url, verbose=verbose)[2]]
+                  "?date=", startyear, ":", endyear, "&per_page=25000", "&format=json")
+        json = [download_parse_json(url, verbose = verbose)[2]]
     elseif typeof(country) == Array{String,1}
         json = Any[]
         for c in country
             url = string("https://api.worldbank.org/countries/", c, "/indicators/", indicator,
-                         "?date=", startyear,":", endyear, "&per_page=25000", "&format=json")
-            append!(json,[download_parse_json(url, verbose=verbose)[2];])
+                         "?date=", startyear, ":", endyear, "&per_page=25000", "&format=json")
+            append!(json, [download_parse_json(url, verbose = verbose)[2];])
         end
     end
 
@@ -268,7 +268,7 @@ df = wdi("NY.GNP.PCAP.CD", ["US","BR"], 1980, 2012, extra=true)
 df = wdi(["NY.GNP.PCAP.CD", "AG.LND.ARBL.HA.PC"], ["US","BR"], 1980, 2012, extra=true)
 ```
 """
-function wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,Array{String,1}}, startyear::Integer=1800, endyear::Integer=3000; extra::Bool=false, verbose::Bool=false)::DataFrame
+function wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,Array{String,1}}, startyear::Integer = 1800, endyear::Integer = 3000; extra::Bool = false, verbose::Bool = false)::DataFrame
     if countries == "all"
         countries = all_countries
     end
@@ -279,31 +279,31 @@ function wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,
 
     for c in countries
         if ! (c in all_countries)
-            error("country ",c," not found")
+            error("country ", c, " not found")
         end
     end
 
     if ! (startyear < endyear)
-        throw(ErrorException("startyear has to be < endyear. startyear=",startyear,". endyear=",endyear))
+        throw(ErrorException("startyear has to be < endyear. startyear=", startyear, ". endyear=", endyear))
     end
 
     if typeof(indicators) == String
-        indicators=[indicators]
+        indicators = [indicators]
     end
 
-    df = wdi_download(indicators[1], countries, startyear, endyear, verbose=verbose)
+    df = wdi_download(indicators[1], countries, startyear, endyear, verbose = verbose)
 
     if length(indicators) > 1
         for ind in indicators[2:length(indicators)]
-            dfn = wdi_download(ind, countries, startyear, endyear, verbose=verbose)
-            df = join(df, dfn, on = [x for x in filter(x -> !(x in map(make_symbol, indicators)), names(df))],
+            dfn = wdi_download(ind, countries, startyear, endyear, verbose = verbose)
+            df = join(df, dfn, on = [x for x in filter(x->!(x in map(make_symbol, indicators)), names(df))],
                                kind = :outer)
         end
     end
 
     if extra
-        cntdat = get_countries(verbose=verbose)
-        df = join(df,cntdat,on=:iso2c)
+        cntdat = get_countries(verbose = verbose)
+        df = join(df, cntdat, on = :iso2c)
     end
 
     sort!(df, [order(:iso2c), order(:year)])
