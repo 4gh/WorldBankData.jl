@@ -279,7 +279,7 @@ function wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,
 
     for c in countries
         if ! (c in all_countries)
-            throw(ErrorException("country ",c," not found"))
+            error("country ",c," not found")
         end
     end
 
