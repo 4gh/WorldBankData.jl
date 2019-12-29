@@ -2,7 +2,7 @@ World Bank Data in Julia
 ========================
 
 The World Bank provides free access to data about development at
-[data.worldbank.org](http://data.worldbank.org).
+[data.worldbank.org](https://data.worldbank.org).
 
 The primary collection of development indicators is called World
 Development Indicators (WDI).
@@ -11,7 +11,7 @@ This module provides two functions to access and download the data:
 `search_wdi()` and `wdi()`.
 
 It follows roughly the
-[R WDI package](http://cran.r-project.org/web/packages/WDI/index.html).
+[R WDI package](https://cran.r-project.org/web/packages/WDI/index.html).
 
 ## Installation
 
@@ -71,7 +71,7 @@ requested.
 ## Searching
 
 The most convenient way to explore the database is probably through a
-web browser at [data.worldbank.org](http://data.worldbank.org).
+web browser at [data.worldbank.org](https://data.worldbank.org).
 
 However, the module does provide a search function: `search_wdi()`.
 
@@ -210,7 +210,7 @@ us_gnp=df[df[:iso2c] .== "US",:]
 ### Year format
 
 For similarity with the
-[R WDI package](http://cran.r-project.org/web/packages/WDI/index.html) the `:year`
+[R WDI package](https://cran.r-project.org/web/packages/WDI/index.html) the `:year`
 column is in Float64 format. WDI data is yearly.
 
 You can easily convert this to a Date series:
