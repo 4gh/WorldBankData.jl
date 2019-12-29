@@ -13,6 +13,12 @@ This module provides two functions to access and download the data:
 It follows roughly the
 [R WDI package](https://cran.r-project.org/web/packages/WDI/index.html).
 
+## Build Status
+
+[![GitHub Build Status](https://github.com/4gh/WorldBankData.jl/actions?query=workflow%3A%22WorldBankData.jl+Continous+Integration%22)](https://github.com/4gh/WorldBankData.jl/workflows/WorldBankData.jl%20Continous%20Integration/badge.svg)
+
+[![Travis CI Build Status](https://travis-ci.org/4gh/WorldBankData.jl.png)](https://travis-ci.org/4gh/WorldBankData.jl)
+
 ## Installation
 
 ```julia
@@ -331,6 +337,4 @@ df=CSV.read("us_gnp.csv")
 ```
 one then runs the `update_us_gnp_per_cap()` function only when needed.
 
-## Build Status
 
-[![Build Status](https://travis-ci.org/4gh/WorldBankData.jl.png)](https://travis-ci.org/4gh/WorldBankData.jl)
