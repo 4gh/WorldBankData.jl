@@ -33,7 +33,20 @@ US and Brazil:
 
 ```julia
 using WorldBankData
-df=wdi("NY.GNP.PCAP.CD", ["US","BR"])
+df = wdi("NY.GNP.PCAP.CD", ["US","BR"])
+
+120×4 DataFrames.DataFrame
+│ Row │ iso2c  │ country       │ NY_GNP_PCAP_CD │ year    │
+│     │ String │ String        │ Float64⍰       │ Float64 │
+├─────┼────────┼───────────────┼────────────────┼─────────┤
+│ 1   │ BR     │ Brazil        │ missing        │ 1960.0  │
+│ 2   │ BR     │ Brazil        │ missing        │ 1961.0  │
+│ 3   │ BR     │ Brazil        │ missing        │ 1962.0  │
+⋮
+│ 117 │ US     │ United States │ 57160.0        │ 2016.0  │
+│ 118 │ US     │ United States │ 59030.0        │ 2017.0  │
+│ 119 │ US     │ United States │ 63080.0        │ 2018.0  │
+│ 120 │ US     │ United States │ missing        │ 2019.0  │
 ```
 
 The WDI indicator `NY.GNP.PCAP.CD` becomes the symbol `NY_GNP_PCAP_CD` in the
@@ -43,7 +56,7 @@ DataFrame, i.e. `.` gets replaced by `_`.
 
 ```julia
 using WorldBankData
-df=wdi(["NY.GNP.PCAP.CD","AG.LND.ARBL.HA.PC"], ["US","BR"], 1980, 2008, extra=true)
+df = wdi(["NY.GNP.PCAP.CD","AG.LND.ARBL.HA.PC"], ["US","BR"], 1980, 2008, extra=true)
 ```
 
 This returns the GNI per capita and the arable land (hectares per
@@ -232,7 +245,7 @@ using WorldBankData
 using StatsPlots
 gr(size=(400,300))
 
-df=wdi("AG.LND.ARBL.HA.PC", "US", 1980, 2010)
+df = wdi("AG.LND.ARBL.HA.PC", "US", 1980, 2010)
 
 @df df scatter(:year, :AG_LND_ARBL_HA_PC)
 ```
@@ -333,7 +346,7 @@ function update_us_gnp_per_cap()
     df = wdi("NY.GNP.PCAP.CD", "US")
     CSV.write("us_gnp.csv",df)
 end
-df=CSV.read("us_gnp.csv")
+df = CSV.read("us_gnp.csv")
 ```
 one then runs the `update_us_gnp_per_cap()` function only when needed.
 
