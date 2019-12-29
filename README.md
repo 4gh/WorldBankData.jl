@@ -57,6 +57,19 @@ DataFrame, i.e. `.` gets replaced by `_`.
 ```julia
 using WorldBankData
 df = wdi(["NY.GNP.PCAP.CD","AG.LND.ARBL.HA.PC"], ["US","BR"], 1980, 2008, extra=true)
+
+58×13 DataFrames.DataFrame
+│ Row │ iso2c   │ country       │ NY_GNP_PCAP_CD │ year     │ AG_LND_ARBL_HA_PC │ iso3c  │ name          │ region                     │ capital         │ longitude │ latitude │ income              │ lending        │
+│     │ String⍰ │ String⍰       │ Float64⍰       │ Float64⍰ │ Float64⍰          │ String │ String        │ String                     │ String          │ Float64⍰  │ Float64⍰ │ String              │ String         │
+├─────┼─────────┼───────────────┼────────────────┼──────────┼───────────────────┼────────┼───────────────┼────────────────────────────┼─────────────────┼───────────┼──────────┼─────────────────────┼────────────────┤
+│ 1   │ BR      │ Brazil        │ 2200.0         │ 1980.0   │ 0.372844          │ BRA    │ Brazil        │ Latin America & Caribbean  │ Brasilia        │ -47.9292  │ -15.7801 │ Upper middle income │ IBRD           │
+│ 2   │ BR      │ Brazil        │ 2090.0         │ 1981.0   │ 0.369021          │ BRA    │ Brazil        │ Latin America & Caribbean  │ Brasilia        │ -47.9292  │ -15.7801 │ Upper middle income │ IBRD           │
+│ 3   │ BR      │ Brazil        │ 2010.0         │ 1982.0   │ 0.371546          │ BRA    │ Brazil        │ Latin America & Caribbean  │ Brasilia        │ -47.9292  │ -15.7801 │ Upper middle income │ IBRD           │
+⋮
+│ 55  │ US      │ United States │ 46190.0        │ 2005.0   │ 0.558733          │ USA    │ United States │ North America              │ Washington D.C. │ -77.032   │ 38.8895  │ High income         │ Not classified │
+│ 56  │ US      │ United States │ 47880.0        │ 2006.0   │ 0.537708          │ USA    │ United States │ North America              │ Washington D.C. │ -77.032   │ 38.8895  │ High income         │ Not classified │
+│ 57  │ US      │ United States │ 48500.0        │ 2007.0   │ 0.537395          │ USA    │ United States │ North America              │ Washington D.C. │ -77.032   │ 38.8895  │ High income         │ Not classified │
+│ 58  │ US      │ United States │ 48980.0        │ 2008.0   │ 0.532114          │ USA    │ United States │ North America              │ Washington D.C. │ -77.032   │ 38.8895  │ High income         │ Not classified │
 ```
 
 This returns the GNI per capita and the arable land (hectares per
