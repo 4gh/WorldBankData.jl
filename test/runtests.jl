@@ -1,6 +1,7 @@
 using Test
 using WorldBankData
 
+include("isformatted.jl")
 include("countries.jl")
 include("indicators.jl")
 include("wdi.jl")
