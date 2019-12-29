@@ -3,6 +3,7 @@ using WorldBankData
 
 include("isformatted.jl")
 include("countries.jl")
+include("bad_arguments.jl")
 include("indicators.jl")
 include("wdi.jl")
 include("search_wdi.jl")

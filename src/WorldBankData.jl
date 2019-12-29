@@ -16,7 +16,7 @@ function download_parse_json(url::String; verbose::Bool = false)
     end
     request = HTTP.get(url)
     if request.status != 200
-        throw(ErrorException("download failed"))
+        error("download failed")
     end
     JSON.parse(String(request.body))
 end
@@ -145,7 +145,7 @@ end
 function search_countries(entry::String, regx::Regex)::DataFrame
     entries = ["name","region","capital","iso2c","iso3c","income","lending"]
     if !(entry in entries)
-        throw(ErrorException("unsupported country entry: \"", entry, "\". supported are:\n", entries))
+        error("unsupported country entry: \"", entry, "\". supported are:\n", entries)
     end
     country_match(entry, regx)
 end
@@ -153,7 +153,7 @@ end
 function search_indicators(entry::String, regx::Regex)::DataFrame
     entries = ["name","description","topics","source_database","source_organization"]
     if !(entry in entries)
-        throw(ErrorException("unsupported indicator entry: \"", entry, "\". supported are\n", entries))
+        error("unsupported indicator entry: \"", entry, "\". supported are\n", entries)
     end
     indicator_match(entry, regx)
 end
@@ -186,7 +186,7 @@ function search_wdi(data::String, entry::String, regx::Regex)::DataFrame
     elseif data == "indicators"
         return search_indicators(entry, regx)
     else
-        throw(ErrorException("unsupported data source:", data, ". supported are: \"countries\" or \"indicators\""))
+        error("unsupported data source:", data, ". supported are: \"countries\" or \"indicators\"")
     end
 end
 
@@ -284,7 +284,7 @@ function wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,
     end
 
     if ! (startyear < endyear)
-        throw(ErrorException("startyear has to be < endyear. startyear=", startyear, ". endyear=", endyear))
+        error("startyear has to be < endyear. startyear=", startyear, ". endyear=", endyear)
     end
 
     if typeof(indicators) == String
