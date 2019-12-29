@@ -7,6 +7,9 @@ include("wdi.jl")
 include("search_wdi.jl")
 include("jsonwdi.jl")
 
-# example_dl.jl test downloads data from the world bank web site.
+# checks the iso 2-letter country codes for updates
+include("check_all_countries.jl")
+
+# example_dl.jl downloads data from the world bank web site.
 # The data gets revised occasionally which breaks the test.
-#include("example_dl.jl")
+include("example_dl.jl")
