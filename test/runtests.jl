@@ -1,15 +1,14 @@
-using Test
-using WorldBankData
+using SafeTestsets
 
-include("isformatted.jl")
-include("countries.jl")
-include("bad_arguments.jl")
-include("indicators.jl")
-include("wdi.jl")
-include("search_wdi.jl")
-include("jsonwdi.jl")
-include("check_all_countries.jl")
+@time @safetestset "is formatted" begin include("isformatted.jl") end
+@time @safetestset "countries" begin include("countries.jl") end
+@time @safetestset "bad arguments" begin include("bad_arguments.jl") end
+@time @safetestset "indicators" begin include("indicators.jl") end
+@time @safetestset "wdi" begin include("wdi.jl") end
+@time @safetestset "search wdi" begin include("search_wdi.jl") end
+@time @safetestset "jsonwdi" begin include("jsonwdi.jl") end
+@time @safetestset "check all_countries status" begin include("check_all_countries.jl") end
 
 # example_dl.jl downloads data from the world bank web site.
 # The data gets revised occasionally which breaks the test.
-include("example_dl.jl")
+@time @safetestset "example download" begin include("example_dl.jl") end
