@@ -213,7 +213,7 @@ function parse_wdi(indicator::String, json::Array{Any,1}, startyear::Integer, en
     for d in json
         clean_append!(country_id, d["country"]["id"])
         clean_append!(country_name, d["country"]["value"])
-        push!(value, d["value"])
+        push!(value, d["value"] isa Nothing ? missing : d["value"])
         clean_append!(date, d["date"])
     end
 
