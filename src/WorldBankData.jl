@@ -130,6 +130,8 @@ function make_symbol(x::String)::Symbol
     Symbol(replace(x, "." => "_"))
 end
 
+make_symbol(x::Symbol) = x
+
 df_match(df::AbstractDataFrame, entry::String, regex::Regex)::DataFrame = df[occursin.(Ref(regex), df[!, make_symbol(entry)]),:]
 
 function country_match(entry::String, regex::Regex)::DataFrame
@@ -295,7 +297,7 @@ function wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,
     if length(indicators) > 1
         for ind in indicators[2:length(indicators)]
             dfn = wdi_download(ind, countries, startyear, endyear, verbose = verbose)
-            df = join(df, dfn, on = [x for x in filter(x->!(x in map(make_symbol, indicators)), names(df))],
+            df = join(df, dfn, on = [x for x in filter(x->!(make_symbol(x) in map(make_symbol, indicators)), names(df))],
                                kind = :outer)
         end
     end
