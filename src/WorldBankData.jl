@@ -80,13 +80,13 @@ function parse_country(json::Array{Any,1})::DataFrame
 end
 
 function download_indicators(;verbose::Bool = false)::DataFrame
-    dat = download_parse_json("https://api.worldbank.org/indicators?per_page=25000&format=json", verbose = verbose)
+    dat = download_parse_json("https://api.worldbank.org/v2/indicators?per_page=25000&format=json", verbose = verbose)
 
     parse_indicator(dat)
 end
 
 function download_countries(;verbose::Bool = false)::DataFrame
-    dat = download_parse_json("https://api.worldbank.org/countries/all?per_page=25000&format=json", verbose = verbose)
+    dat = download_parse_json("https://api.worldbank.org/v2/countries/all?per_page=25000&format=json", verbose = verbose)
 
     parse_country(dat)
 end
@@ -205,17 +205,16 @@ end
 function parse_wdi(indicator::String, json::Array{Any,1}, startyear::Integer, endyear::Integer)::DataFrame
     country_id = String[]
     country_name = String[]
-    value = String[]
+    value = Union{Float64, Missing}[]
     date = String[]
 
     for d in json
         clean_append!(country_id, d["country"]["id"])
         clean_append!(country_name, d["country"]["value"])
-        clean_append!(value, d["value"])
+        push!(value, d["value"])
         clean_append!(date, d["date"])
     end
 
-    value = tofloat.(value)
     date = tofloat.(date)
 
     df = DataFrame(iso2c = country_id, country = country_name)
@@ -229,13 +228,13 @@ end
 
 function wdi_download(indicator::String, country::Union{String,Array{String,1}}, startyear::Integer, endyear::Integer; verbose::Bool = false)::DataFrame
     if typeof(country) == String
-        url = string("https://api.worldbank.org/countries/", country, "/indicators/", indicator,
+        url = string("https://api.worldbank.org/v2/countries/", country, "/indicators/", indicator,
                   "?date=", startyear, ":", endyear, "&per_page=25000", "&format=json")
         json = [download_parse_json(url, verbose = verbose)[2]]
     elseif typeof(country) == Array{String,1}
         json = Any[]
         for c in country
-            url = string("https://api.worldbank.org/countries/", c, "/indicators/", indicator,
+            url = string("https://api.worldbank.org/v2/countries/", c, "/indicators/", indicator,
                          "?date=", startyear, ":", endyear, "&per_page=25000", "&format=json")
             append!(json, [download_parse_json(url, verbose = verbose)[2];])
         end

@@ -2,13 +2,13 @@ using Test
 using WorldBankData
 
 us_gnp_data = Any[  Dict("total" => 23, "per_page" => "25000", "pages" => 1, "page" => 1),
-                  Any[ Dict("date" => "2012", "value" => "52340", "indicator" => Dict("id" => "NY.GNP.PCAP.CD", "value" => "GNI per capita, Atlas method (current US\$)"), "country" => Dict("id" => "US", "value" => "United States"), "decimal" => "0"),
-                    Dict("date" => "2011", "value" => "50650", "indicator" => Dict("id" => "NY.GNP.PCAP.CD", "value" => "GNI per capita, Atlas method (current US\$)"), "country" => Dict("id" => "US", "value" => "United States"), "decimal" => "0"),
-                    Dict("date" => "2010", "value" => "48960", "indicator" => Dict("id" => "NY.GNP.PCAP.CD", "value" => "GNI per capita, Atlas method (current US\$)"), "country" => Dict("id" => "US", "value" => "United States"), "decimal" => "0"),
-                    Dict("date" => "2009", "value" => "48040", "indicator" => Dict("id" => "NY.GNP.PCAP.CD", "value" => "GNI per capita, Atlas method (current US\$)"), "country" => Dict("id" => "US", "value" => "United States"), "decimal" => "0"),
-                    Dict("date" => "2008", "value" => "49350", "indicator" => Dict("id" => "NY.GNP.PCAP.CD", "value" => "GNI per capita, Atlas method (current US\$)"), "country" => Dict("id" => "US", "value" => "United States"), "decimal" => "0"),
-                    Dict("date" => "2007", "value" => "48640", "indicator" => Dict("id" => "NY.GNP.PCAP.CD", "value" => "GNI per capita, Atlas method (current US\$)"), "country" => Dict("id" => "US", "value" => "United States"), "decimal" => "0"),
-                    Dict("date" => "2006", "value" => "48080", "indicator" => Dict("id" => "NY.GNP.PCAP.CD", "value" => "GNI per capita, Atlas method (current US\$)"), "country" => Dict("id" => "US", "value" => "United States"), "decimal" => "0")
+                  Any[ Dict("date" => "2012", "value" => 52340, "indicator" => Dict("id" => "NY.GNP.PCAP.CD", "value" => "GNI per capita, Atlas method (current US\$)"), "country" => Dict("id" => "US", "value" => "United States"), "decimal" => "0"),
+                    Dict("date" => "2011", "value" => 50650, "indicator" => Dict("id" => "NY.GNP.PCAP.CD", "value" => "GNI per capita, Atlas method (current US\$)"), "country" => Dict("id" => "US", "value" => "United States"), "decimal" => "0"),
+                    Dict("date" => "2010", "value" => 48960, "indicator" => Dict("id" => "NY.GNP.PCAP.CD", "value" => "GNI per capita, Atlas method (current US\$)"), "country" => Dict("id" => "US", "value" => "United States"), "decimal" => "0"),
+                    Dict("date" => "2009", "value" => 48040, "indicator" => Dict("id" => "NY.GNP.PCAP.CD", "value" => "GNI per capita, Atlas method (current US\$)"), "country" => Dict("id" => "US", "value" => "United States"), "decimal" => "0"),
+                    Dict("date" => "2008", "value" => 49350, "indicator" => Dict("id" => "NY.GNP.PCAP.CD", "value" => "GNI per capita, Atlas method (current US\$)"), "country" => Dict("id" => "US", "value" => "United States"), "decimal" => "0"),
+                    Dict("date" => "2007", "value" => 48640, "indicator" => Dict("id" => "NY.GNP.PCAP.CD", "value" => "GNI per capita, Atlas method (current US\$)"), "country" => Dict("id" => "US", "value" => "United States"), "decimal" => "0"),
+                    Dict("date" => "2006", "value" => 48080, "indicator" => Dict("id" => "NY.GNP.PCAP.CD", "value" => "GNI per capita, Atlas method (current US\$)"), "country" => Dict("id" => "US", "value" => "United States"), "decimal" => "0")
                   ]
                 ]
 
