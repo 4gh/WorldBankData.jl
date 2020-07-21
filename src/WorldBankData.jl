@@ -294,16 +294,16 @@ function wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,
     df = wdi_download(indicators[1], countries, startyear, endyear, verbose = verbose)
 
     if length(indicators) > 1
+        noindcols = [x for x in filter(x->!(x in map(ind->String(make_symbol(ind)), indicators)), names(df))]
         for ind in indicators[2:length(indicators)]
             dfn = wdi_download(ind, countries, startyear, endyear, verbose = verbose)
-            df = join(df, dfn, on = [x for x in filter(x->!(x in map(make_symbol, indicators)), names(df))],
-                               kind = :outer)
+            df = outerjoin(df, dfn, on = noindcols)
         end
     end
 
     if extra
         cntdat = get_countries(verbose = verbose)
-        df = join(df, cntdat, on = :iso2c)
+        df = innerjoin(df, cntdat, on = :iso2c)
     end
 
     sort!(df, [order(:iso2c), order(:year)])

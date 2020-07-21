@@ -1,6 +1,7 @@
 using Test
 using WorldBankData
-using FilePaths
+using FilePathsBase
 using DocumentFormat
 
 @test DocumentFormat.isformatted(p".")
+
