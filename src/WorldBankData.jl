@@ -207,7 +207,7 @@ end
 function parse_wdi(indicator::String, json::Array{Any,1}, startyear::Integer, endyear::Integer)::DataFrame
     country_id = String[]
     country_name = String[]
-    value = Union{Float64, Missing}[]
+    value = Union{Float64,Missing}[]
     date = String[]
 
     for d in json
