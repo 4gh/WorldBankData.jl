@@ -347,9 +347,9 @@ using CSV
 
 function update_us_pop_totl()
     df = wdi("SP.POP.TOTL", "US")
-    CSV.write("us_gnp.csv",df)
+    CSV.write("us_pop_totl.csv",df)
 end
-df = CSV.read("us_gnp.csv")
+df = CSV.read("us_pop_totl.csv")
 ```
 Occasionally update the data by running the `update_us_pop_totl()` function.
 
