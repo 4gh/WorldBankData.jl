@@ -1,14 +1,15 @@
 World Bank Data in Julia
 ========================
 
-The World Bank provides free access to data about development at
+The World Bank provides access to global development data at
 [data.worldbank.org](https://data.worldbank.org).
 
 The primary collection of development indicators is called World
 Development Indicators (WDI).
 
 This module provides two functions to access and download the data:
-`search_wdi()` and `wdi()`.
+`search_wdi()` and `wdi()`. These functions return
+[DataFrames](https://github.com/JuliaData/DataFrames.jl).
 
 It follows roughly the
 [R WDI package](https://cran.r-project.org/web/packages/WDI/index.html).
@@ -28,62 +29,70 @@ Pkg.add("WorldBankData")
 
 ## Basic Examples
 
-Obtain a DataFrame with the gross national income per capita for the
-US and Brazil:
+Get a DataFrame of the total population of the U.S. from 1980 until 2012:
 
 ```julia
 using WorldBankData
-df = wdi("NY.GNP.PCAP.CD", ["US","BR"])
-
-120×4 DataFrames.DataFrame
-│ Row │ iso2c  │ country       │ NY_GNP_PCAP_CD │ year    │
-│     │ String │ String        │ Float64⍰       │ Float64 │
-├─────┼────────┼───────────────┼────────────────┼─────────┤
-│ 1   │ BR     │ Brazil        │ missing        │ 1960.0  │
-│ 2   │ BR     │ Brazil        │ missing        │ 1961.0  │
-│ 3   │ BR     │ Brazil        │ missing        │ 1962.0  │
+julia> df = wdi("SP.POP.TOTL", "US", 1980, 2012, extra=true)
+33×12 DataFrame. Omitted printing of 5 columns
+│ Row │ iso2c  │ country       │ SP_POP_TOTL │ year    │ iso3c  │ name          │ region        │
+│     │ String │ String        │ Float64?    │ Float64 │ String │ String        │ String        │
+├─────┼────────┼───────────────┼─────────────┼─────────┼────────┼───────────────┼───────────────┤
+│ 1   │ US     │ United States │ 2.27225e8   │ 1980.0  │ USA    │ United States │ North America │
+│ 2   │ US     │ United States │ 2.29466e8   │ 1981.0  │ USA    │ United States │ North America │
+│ 3   │ US     │ United States │ 2.31664e8   │ 1982.0  │ USA    │ United States │ North America │
+│ 4   │ US     │ United States │ 2.33792e8   │ 1983.0  │ USA    │ United States │ North America │
+│ 5   │ US     │ United States │ 2.35825e8   │ 1984.0  │ USA    │ United States │ North America │
 ⋮
-│ 118 │ US     │ United States │ 59030.0        │ 2017.0  │
-│ 119 │ US     │ United States │ 63080.0        │ 2018.0  │
-│ 120 │ US     │ United States │ missing        │ 2019.0  │
+│ 28  │ US     │ United States │ 3.01231e8   │ 2007.0  │ USA    │ United States │ North America │
+│ 29  │ US     │ United States │ 3.04094e8   │ 2008.0  │ USA    │ United States │ North America │
+│ 30  │ US     │ United States │ 3.06772e8   │ 2009.0  │ USA    │ United States │ North America │
+│ 31  │ US     │ United States │ 3.09322e8   │ 2010.0  │ USA    │ United States │ North America │
+│ 32  │ US     │ United States │ 3.11557e8   │ 2011.0  │ USA    │ United States │ North America │
+│ 33  │ US     │ United States │ 3.13831e8   │ 2012.0  │ USA    │ United States │ North America │
 ```
 
 The WDI indicator `NY.GNP.PCAP.CD` becomes the symbol `NY_GNP_PCAP_CD` in the
 DataFrame, i.e. `.` gets replaced by `_`.
 
-### Multiple countries and indicators
+ISO 3 letter country codes are also supported:
 
 ```julia
 using WorldBankData
-df = wdi(["NY.GNP.PCAP.CD","AG.LND.ARBL.HA.PC"], ["US","BR"], 1980, 2008, extra=true)
-
-58×13 DataFrames.DataFrame
-│ Row │ iso2c   │ country       │ NY_GNP_PCAP_CD │ year     │ AG_LND_ARBL_HA_PC │ iso3c  │ name          │ region                     │ capital         │ longitude │ latitude │ income              │ lending        │
-│     │ String⍰ │ String⍰       │ Float64⍰       │ Float64⍰ │ Float64⍰          │ String │ String        │ String                     │ String          │ Float64⍰  │ Float64⍰ │ String              │ String         │
-├─────┼─────────┼───────────────┼────────────────┼──────────┼───────────────────┼────────┼───────────────┼────────────────────────────┼─────────────────┼───────────┼──────────┼─────────────────────┼────────────────┤
-│ 1   │ BR      │ Brazil        │ 2200.0         │ 1980.0   │ 0.372844          │ BRA    │ Brazil        │ Latin America & Caribbean  │ Brasilia        │ -47.9292  │ -15.7801 │ Upper middle income │ IBRD           │
-│ 2   │ BR      │ Brazil        │ 2090.0         │ 1981.0   │ 0.369021          │ BRA    │ Brazil        │ Latin America & Caribbean  │ Brasilia        │ -47.9292  │ -15.7801 │ Upper middle income │ IBRD           │
-│ 3   │ BR      │ Brazil        │ 2010.0         │ 1982.0   │ 0.371546          │ BRA    │ Brazil        │ Latin America & Caribbean  │ Brasilia        │ -47.9292  │ -15.7801 │ Upper middle income │ IBRD           │
-⋮
-│ 57  │ US      │ United States │ 48500.0        │ 2007.0   │ 0.537395          │ USA    │ United States │ North America              │ Washington D.C. │ -77.032   │ 38.8895  │ High income         │ Not classified │
-│ 58  │ US      │ United States │ 48980.0        │ 2008.0   │ 0.532114          │ USA    │ United States │ North America              │ Washington D.C. │ -77.032   │ 38.8895  │ High income         │ Not classified │
+df = wdi("SP.POP.TOTL", "USA", 1980, 2012, extra=true)
 ```
 
-This returns the GNI per capita and the arable land (hectares per
-person) for the time range 1980-2008 for the US and Brazil. It also
-attaches extra country information (the `extra=true` argument) like the
-capital, longitude, latitude, income range, etc.
+Get a DataFrame of the total population of all countries in 2000:
+
+```julia
+using WorldBankData
+df = wdi("SP.POP.TOTL", "all", 1980, 2012, extra=true)
+```
+
+Get a DataFrame of the total population of the U.S. and Brazil from 1980 until 2012:
+
+```julia
+using WorldBankData
+df = wdi("SP.POP.TOTL", ["US","BR"], 1980, 2012, extra=true)
+```
+
+Multiple indicators can be requested:
+
+```julia
+using WorldBankData
+df = wdi(["SP.POP.TOTL", "NY.GDP.MKTP.CD"], ["US","BR"], 1980, 2012, extra=true)
+```
 
 ## Arguments
 
 The `wdi` function has the following arguments:
 
 ```julia
-wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,Array{String,1}}, startyear::Integer=1800, endyear::Integer=3000; extra::Bool=false, verbose::Bool=false)
+wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,Array{String,1}}, startyear::Integer = -1, endyear::Integer = -1; extra::Bool = false, verbose::Bool = false)::DataFrame
 ```
 
 It needs a minimum of two arguments: the `indicators` (from the WDI
-database) and the `countries` (ISO two letter country codes). The rest
+database) and the `countries` (ISO two or three letter country codes). The rest
 are optional arguments.
 
 `startyear`: First year to include.
@@ -93,9 +102,7 @@ are optional arguments.
 `extra`: If `extra=true`, `wdi()` attaches extra country data (like the
 capital) to the returned DataFrame.
 
-`verbose`: If `verbose=true`, `wdi()` will print URL download information. This
-can be used as a progress indicator if many countries and indicators are
-requested.
+`verbose`: If `verbose=true`, `wdi()` will print URL download information.
 
 ## Searching
 
@@ -181,12 +188,12 @@ insensitive.
 ### Examples of country searches
 
 ```julia
-search_wdi("countries","iso2c",r"TZ"i)
-1×9 DataFrames.DataFrame
-│ Row │ iso3c  │ iso2c  │ name     │ region              │ capital │ longitude │ latitude │ income     │ lending │
-│     │ String │ String │ String   │ String              │ String  │ Float64⍰  │ Float64⍰ │ String     │ String  │
-├─────┼────────┼────────┼──────────┼─────────────────────┼─────────┼───────────┼──────────┼────────────┼─────────┤
-│ 1   │ TZA    │ TZ     │ Tanzania │ Sub-Saharan Africa  │ Dodoma  │ 35.7382   │ -6.17486 │ Low income │ IDA     │
+julia> search_wdi("countries","iso2c",r"TZ"i)
+1×9 DataFrame. Omitted printing of 2 columns
+│ Row │ iso3c  │ iso2c  │ name     │ region              │ capital │ longitude │ latitude │
+│     │ String │ String │ String   │ String              │ String  │ Float64?  │ Float64? │
+├─────┼────────┼────────┼──────────┼─────────────────────┼─────────┼───────────┼──────────┤
+│ 1   │ TZA    │ TZ     │ Tanzania │ Sub-Saharan Africa  │ Dodoma  │ 35.7382   │ -6.17486 │
 
 julia> search_wdi("countries","income",r"upper middle"i)
 ...
@@ -194,14 +201,14 @@ julia> search_wdi("countries","income",r"upper middle"i)
 julia> search_wdi("countries","region",r"Latin America"i)
 ...
 
-search_wdi("countries","capital",r"^Ka"i)
-3×9 DataFrames.DataFrame
-│ Row │ iso3c  │ iso2c  │ name        │ region              │ capital   │ longitude │ latitude │ income     │ lending │
-│     │ String │ String │ String      │ String              │ String    │ Float64⍰  │ Float64⍰ │ String     │ String  │
-├─────┼────────┼────────┼─────────────┼─────────────────────┼───────────┼───────────┼──────────┼────────────┼─────────┤
-│ 1   │ AFG    │ AF     │ Afghanistan │ South Asia          │ Kabul     │ 69.1761   │ 34.5228  │ Low income │ IDA     │
-│ 2   │ NPL    │ NP     │ Nepal       │ South Asia          │ Kathmandu │ 85.3157   │ 27.6939  │ Low income │ IDA     │
-│ 3   │ UGA    │ UG     │ Uganda      │ Sub-Saharan Africa  │ Kampala   │ 32.5729   │ 0.314269 │ Low income │ IDA     │
+julia> search_wdi("countries","capital",r"^Ka"i)
+3×9 DataFrame. Omitted printing of 2 columns
+│ Row │ iso3c  │ iso2c  │ name        │ region              │ capital   │ longitude │ latitude │
+│     │ String │ String │ String      │ String              │ String    │ Float64?  │ Float64? │
+├─────┼────────┼────────┼─────────────┼─────────────────────┼───────────┼───────────┼──────────┤
+│ 1   │ AFG    │ AF     │ Afghanistan │ South Asia          │ Kabul     │ 69.1761   │ 34.5228  │
+│ 2   │ NPL    │ NP     │ Nepal       │ South Asia          │ Kathmandu │ 85.3157   │ 27.6939  │
+│ 3   │ UGA    │ UG     │ Uganda      │ Sub-Saharan Africa  │ Kampala   │ 32.5729   │ 0.314269 │
 
 julia> search_wdi("countries","lending",r"IBRD"i)
 ...
@@ -248,16 +255,16 @@ df[!, :year] = map(Date, df[!, :year])
 ### Plotting
 
 Install the [StatsPlots.jl](https://github.com/JuliaPlots/StatsPlots.jl) package with
-`Pkg.add("StatsPlots")`.
+`import Pkg; Pkg.add("StatsPlots")`.
 
 ```julia
 using WorldBankData
 using StatsPlots
 gr(size=(400,300))
 
-df = wdi("AG.LND.ARBL.HA.PC", "US", 1980, 2010)
+df = wdi("SP.POP.TOTL", "US", 1980, 2010)
 
-@df df scatter(:year, :AG_LND_ARBL_HA_PC)
+@df df scatter(:year, :SP_POP_TOTL)
 ```
 
 ### Empty/Missing results
@@ -338,12 +345,11 @@ using WorldBankData
 using DataFrames
 using CSV
 
-function update_us_gnp_per_cap()
-    df = wdi("NY.GNP.PCAP.CD", "US")
+function update_us_pop_totl()
+    df = wdi("SP.POP.TOTL", "US")
     CSV.write("us_gnp.csv",df)
 end
 df = CSV.read("us_gnp.csv")
 ```
-one then runs the `update_us_gnp_per_cap()` function only when needed.
-
+Occasionally update the data by running the `update_us_pop_totl()` function.
 
