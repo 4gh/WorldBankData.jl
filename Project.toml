@@ -14,12 +14,11 @@ JSON = "^0.21"
 julia = "^1.4"
 
 [extras]
-SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DocumentFormat = "ffa9a821-9c82-50df-894e-fbcef3ed31cd"
 FilePathsBase = "48062228-2e41-5def-b9a4-89aafe57970f"
+SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test", "SafeTestsets", "CSV", "DocumentFormat", "FilePathsBase"]
-

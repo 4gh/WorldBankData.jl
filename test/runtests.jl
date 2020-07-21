@@ -1,6 +1,6 @@
 using SafeTestsets
 
-#@time @safetestset "is formatted" begin include("isformatted.jl") end
+@time @safetestset "is formatted" begin include("isformatted.jl") end
 @time @safetestset "countries" begin include("countries.jl") end
 @time @safetestset "get_url" begin include("get_url.jl") end
 @time @safetestset "bad arguments" begin include("bad_arguments.jl") end
