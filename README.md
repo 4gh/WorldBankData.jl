@@ -52,7 +52,7 @@ julia> df = wdi("SP.POP.TOTL", "US", 1980, 2012, extra=true)
 │ 33  │ US     │ United States │ 3.13831e8   │ 2012.0  │ USA    │ United States │ North America │
 ```
 
-The WDI indicator `NY.GNP.PCAP.CD` becomes the symbol `NY_GNP_PCAP_CD` in the
+The WDI indicator `SP.POP.TOTL` becomes the symbol `SP_POP_TOTL` in the
 DataFrame, i.e. `.` gets replaced by `_`.
 
 ISO 3 letter country codes are also supported:
@@ -233,8 +233,8 @@ julia> search_wdi("indicators","source_organization",r"Global Partnership"i)
 ### Extracting country data from results
 
 ```julia
-df = wdi("NY.GNP.PCAP.CD", ["US","BR"], 1980, 2012, extra=true)
-us_gnp = df[df[!, :iso2c] .== "US", :]
+df = wdi("SP.POP.TOTL", ["US","BR"], 1980, 2012, extra=true)
+us_pop = df[df[!, :iso2c] .== "US", :]
 ```
 
 ### Year format
