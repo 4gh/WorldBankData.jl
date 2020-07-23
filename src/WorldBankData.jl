@@ -224,7 +224,7 @@ function parse_wdi(indicators::Array{String,1}, jsondata::Array{Any,1}, startyea
     dflong = DataFrame(iso2c=country_id, country=country_name, year=date, indicator=indicator_id, value=value)
 
     if returnlong
-       return dflong
+        return dflong
     end
 
     dflong[!,:indicator] = map(x -> replace(x, "." => "_"), dflong[!,:indicator])
@@ -270,7 +270,7 @@ function get_url(indicators::Union{String,Array{String,1}}, countries::Union{Str
     indicatorstr = ""
     if typeof(indicators) == String
         indicatorstr = indicators
-    elseif typeof(indicators) == Array{String, 1}
+    elseif typeof(indicators) == Array{String,1}
         indicatorstr = array_to_querystr(indicators)
     end
 
@@ -303,21 +303,22 @@ end
 all_countries = ["AW", "AF", "A9", "AO", "AL", "AD", "L5", "1A", "AE", "AR", "AM", "AS", "AG", "AU", "AT", "AZ", "BI", "B4", "B7", "BE", "BJ", "BF", "BD", "BG", "B1", "BH", "BS", "BA", "B2", "BY", "BZ", "B3", "BM", "BO", "BR", "BB", "BN", "B6", "BT", "BW", "C9", "CF", "CA", "C4", "B8", "C5", "CH", "JG", "CL", "CN", "CI", "C6", "C7", "CM", "CD", "CG", "CO", "KM", "CV", "CR", "C8", "S3", "CU", "CW", "KY", "CY", "CZ", "D4", "D7", "DE", "D8", "DJ", "D2", "DM", "D3", "D9", "DK", "N6", "DO", "D5", "F6", "D6", "6D", "DZ", "4E", "V2", "Z4", "7E", "Z7", "EC", "EG", "XC", "ER", "ES", "EE", "ET", "EU", "F1", "FI", "FJ", "FR", "FO", "FM", "6F", "GA", "GB", "GE", "GH", "GI", "GN", "GM", "GW", "GQ", "GR", "GD", "GL", "GT", "GU", "GY", "XD", "HK", "HN", "XE", "HR", "HT", "HU", "ZB", "XF", "ZT", "XG", "XH", "ID", "XI", "IM", "IN", "XY", "IE", "IR", "IQ", "IS", "IL", "IT", "JM", "JO", "JP", "KZ", "KE", "KG", "KH", "KI", "KN", "KR", "KW", "XJ", "LA", "LB", "LR", "LY", "LC", "ZJ", "L4", "XL", "XM", "LI", "LK", "XN", "XO", "LS", "V3", "LT", "LU", "LV", "MO", "MF", "MA", "L6", "MC", "MD", "M1", "MG", "MV", "ZQ", "MX", "MH", "XP", "MK", "ML", "MT", "MM", "XQ", "ME", "MN", "MP", "MZ", "MR", "MU", "MW", "MY", "XU", "M2", "NA", "NC", "NE", "NG", "NI", "NL", "6L", "NO", "NP", "6X", "NR", "6N", "NZ", "OE", "OM", "S4", "PK", "PA", "PE", "PH", "PW", "PG", "PL", "V1", "PR", "KP", "PT", "PY", "PS", "S2", "V4", "PF", "QA", "RO", "R6", "O6", "RU", "RW", "8S", "SA", "L7", "SD", "SN", "SG", "SB", "SL", "SV", "SM", "SO", "RS", "ZF", "SS", "ZG", "S1", "ST", "SR", "SK", "SI", "SE", "SZ", "SX", "A4", "SC", "SY", "TC", "TD", "T4", "T7", "TG", "TH", "TJ", "TM", "T2", "TL", "T3", "TO", "T5", "T6", "TT", "TN", "TR", "TV", "TW", "TZ", "UG", "UA", "XT", "UY", "US", "UZ", "VC", "VE", "VG", "VI", "VN", "VU", "1W", "WS", "XK", "A5", "YE", "ZA", "ZM", "ZW"]
 
 """
-function wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,Array{String,1}}, startyear::Integer = -1, endyear::Integer = -1; extra::Bool = false, verbose::Bool = false)::DataFrame
+function wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,Array{String,1}}, startyear::Integer=-1, endyear::Integer=-1; extra::Bool=false, sourceid::Integer=2, dflong::Bool=false, verbose::Bool=false)::DataFrame
 
 Download data from World Development Indicators (WDI) Data Catalog of the World Bank.
 
 https://datacatalog.worldbank.org/dataset/world-development-indicators
 
-**Arguments**
-`indicators` : indicator name or array of indicators
-`countries` : string or string array of ISO 2 or ISO 3 letter country codes or `all` for all countries.
-`startyear` : first year to include
-`endyear` : last year to include (required if startyear is set)
-`extra` : if `true` additional country data should be included (region, capital, longitude, latitude, income, lending)
-`sourceid` : source number, see https://api.worldbank.org/v2/sources
-`dflong` : long dataframe format. default is wide. with many indicators `long` might be easier to work with.
-`verbose` : if `true` print URLs downloaded
+# Arguments
+
+- `indicators` : indicator name or array of indicators
+- `countries` : string or string array of ISO 2 or ISO 3 letter country codes or `all` for all countries.
+- `startyear` : first year to include
+- `endyear` : last year to include (required if startyear is set)
+- `extra` : if `true` additional country data should be included (region, capital, longitude, latitude, income, lending)
+- `sourceid` : source number, see https://api.worldbank.org/v2/sources
+- `dflong` : long dataframe format. default is wide. with many indicators `long` might be easier to work with.
+- `verbose` : if `true` print URLs downloaded
 
 # Examples
 ```julia
@@ -327,6 +328,7 @@ df = wdi("SP.POP.TOTL", "USA", 1980, 2012, extra=true)
 df = wdi("SP.POP.TOTL", "all", 2000, 2000, verbose=true, extra=true)
 df = wdi("SP.POP.TOTL", ["US","BR"], 1980, 2012, extra=true)
 df = wdi(["SP.POP.TOTL", "NY.GDP.MKTP.CD"], ["US","BR"], 1980, 2012, extra=true)
+df = wdi(["SP.POP.TOTL", "NY.GDP.MKTP.CD"], ["US","BR"], 1980, 2012, dflong=true)
 ```
 """
 function wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,Array{String,1}}, startyear::Integer=-1, endyear::Integer=-1; extra::Bool=false, sourceid::Integer=2, dflong::Bool=false, verbose::Bool=false)::DataFrame
