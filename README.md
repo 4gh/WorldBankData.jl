@@ -29,10 +29,26 @@ Pkg.add("WorldBankData")
 
 ## Basic Examples
 
-Get a DataFrame of the total population of the U.S. from 1980 until 2012:
-
+Get a DataFrame of the U.S. population:
 ```julia
-using WorldBankData
+julia> using WorldBankData
+julia> df = wdi("SP.POP.TOTL", "US")
+60×4 DataFrame
+│ Row │ iso2c  │ country       │ year    │ SP_POP_TOTL │
+│     │ String │ String        │ Float64 │ Float64?    │
+├─────┼────────┼───────────────┼─────────┼─────────────┤
+│ 1   │ US     │ United States │ 1960.0  │ 1.80671e8   │
+│ 2   │ US     │ United States │ 1961.0  │ 1.83691e8   │
+⋮
+│ 59  │ US     │ United States │ 2018.0  │ 3.26688e8   │
+│ 60  │ US     │ United States │ 2019.0  │ 3.2824e8    │
+```
+
+The WDI indicator `SP.POP.TOTL` becomes the column `SP_POP_TOTL` in the
+DataFrame, i.e. `.` gets replaced by `_`.
+
+Get a DataFrame of the U.S. population from 1980 until 2012 including region data:
+```julia
 julia> df = wdi("SP.POP.TOTL", "US", 1980, 2012, extra=true)
 33×12 DataFrame. Omitted printing of 5 columns
 │ Row │ iso2c  │ country       │ SP_POP_TOTL │ year    │ iso3c  │ name          │ region        │
@@ -40,47 +56,49 @@ julia> df = wdi("SP.POP.TOTL", "US", 1980, 2012, extra=true)
 ├─────┼────────┼───────────────┼─────────────┼─────────┼────────┼───────────────┼───────────────┤
 │ 1   │ US     │ United States │ 2.27225e8   │ 1980.0  │ USA    │ United States │ North America │
 │ 2   │ US     │ United States │ 2.29466e8   │ 1981.0  │ USA    │ United States │ North America │
-│ 3   │ US     │ United States │ 2.31664e8   │ 1982.0  │ USA    │ United States │ North America │
-│ 4   │ US     │ United States │ 2.33792e8   │ 1983.0  │ USA    │ United States │ North America │
-│ 5   │ US     │ United States │ 2.35825e8   │ 1984.0  │ USA    │ United States │ North America │
 ⋮
-│ 28  │ US     │ United States │ 3.01231e8   │ 2007.0  │ USA    │ United States │ North America │
-│ 29  │ US     │ United States │ 3.04094e8   │ 2008.0  │ USA    │ United States │ North America │
-│ 30  │ US     │ United States │ 3.06772e8   │ 2009.0  │ USA    │ United States │ North America │
-│ 31  │ US     │ United States │ 3.09322e8   │ 2010.0  │ USA    │ United States │ North America │
 │ 32  │ US     │ United States │ 3.11557e8   │ 2011.0  │ USA    │ United States │ North America │
 │ 33  │ US     │ United States │ 3.13831e8   │ 2012.0  │ USA    │ United States │ North America │
 ```
 
-The WDI indicator `SP.POP.TOTL` becomes the symbol `SP_POP_TOTL` in the
-DataFrame, i.e. `.` gets replaced by `_`.
-
 ISO 3 letter country codes are also supported:
-
 ```julia
-using WorldBankData
-df = wdi("SP.POP.TOTL", "USA", 1980, 2012, extra=true)
+df = wdi("SP.POP.TOTL", "USA", 1980, 2012)
 ```
 
-Get a DataFrame of the total population of all countries in 2000:
-
+Multiple indicators and can be requested:
 ```julia
-using WorldBankData
-df = wdi("SP.POP.TOTL", "all", 1980, 2012, extra=true)
+julia> df = wdi(["SP.POP.TOTL", "NY.GDP.MKTP.CD"], ["US","BR"], 1980, 2012)
+66×5 DataFrame
+│ Row │ iso2c  │ country       │ year    │ NY_GDP_MKTP_CD │ SP_POP_TOTL │
+│     │ String │ String        │ Float64 │ Float64?       │ Float64?    │
+├─────┼────────┼───────────────┼─────────┼────────────────┼─────────────┤
+│ 1   │ BR     │ Brazil        │ 1980.0  │ 2.35025e11     │ 1.20694e8   │
+│ 2   │ BR     │ Brazil        │ 1981.0  │ 2.63561e11     │ 1.2357e8    │
+⋮
+│ 65  │ US     │ United States │ 2011.0  │ 1.55426e13     │ 3.11557e8   │
+│ 66  │ US     │ United States │ 2012.0  │ 1.6197e13      │ 3.13831e8   │
 ```
 
-Get a DataFrame of the total population of the U.S. and Brazil from 1980 until 2012:
-
+By default a wide DataFrame is returned (indicators are columns). The data can also be returned in long format which might be more useful if many indicators are requested:
 ```julia
-using WorldBankData
-df = wdi("SP.POP.TOTL", ["US","BR"], 1980, 2012, extra=true)
+ulia> df = wdi(["SP.POP.TOTL", "NY.GDP.MKTP.CD"], ["US","BR"], 1980, 2012, dflong=true)
+132×5 DataFrame
+│ Row │ iso2c  │ country       │ year    │ indicator      │ value      │
+│     │ String │ String        │ Float64 │ String         │ Float64?   │
+├─────┼────────┼───────────────┼─────────┼────────────────┼────────────┤
+│ 1   │ BR     │ Brazil        │ 1980.0  │ SP.POP.TOTL    │ 1.20694e8  │
+│ 2   │ BR     │ Brazil        │ 1980.0  │ NY.GDP.MKTP.CD │ 2.35025e11 │
+⋮
+│ 131 │ US     │ United States │ 2012.0  │ SP.POP.TOTL    │ 3.13831e8  │
+│ 132 │ US     │ United States │ 2012.0  │ NY.GDP.MKTP.CD │ 1.6197e13  │
 ```
 
-Multiple indicators can be requested:
+Get a DataFrame of the total population for all countries in 2000:
 
 ```julia
 using WorldBankData
-df = wdi(["SP.POP.TOTL", "NY.GDP.MKTP.CD"], ["US","BR"], 1980, 2012, extra=true)
+df = wdi("SP.POP.TOTL", "all", 1980, 2012)
 ```
 
 ## Arguments
@@ -88,7 +106,9 @@ df = wdi(["SP.POP.TOTL", "NY.GDP.MKTP.CD"], ["US","BR"], 1980, 2012, extra=true)
 The `wdi` function has the following arguments:
 
 ```julia
-wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,Array{String,1}}, startyear::Integer = -1, endyear::Integer = -1; extra::Bool = false, verbose::Bool = false)::DataFrame
+function wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,Array{String,1}},
+             startyear::Integer=-1, endyear::Integer=-1;
+             extra::Bool=false, sourceid::Integer=2, dflong::Bool=false, verbose::Bool=false)::DataFrame
 ```
 
 It needs a minimum of two arguments: the `indicators` (from the WDI
@@ -99,8 +119,11 @@ are optional arguments.
 
 `endyear`: Last year to include.
 
-`extra`: If `extra=true`, `wdi()` attaches extra country data (like the
-capital) to the returned DataFrame.
+`extra`: If `extra=true`, `wdi()` attaches extra country data to the returned DataFrame.
+
+`sourceid`: Database source number, see https://api.worldbank.org/v2/sources
+
+`dflong`: Return long DataFrame format. Default is wide. If many indicators are requested `long` might be preferable.
 
 `verbose`: If `verbose=true`, `wdi()` will print URL download information.
 
