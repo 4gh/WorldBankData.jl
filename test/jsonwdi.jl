@@ -8,22 +8,14 @@ testjsonstr = "[{\"page\":1,\"pages\":1,\"per_page\":50,\"total\":8,\"sourceid\"
 
 dfref = DataFrame(iso2c=["US" for _ in range(1, length=8)],
     country=["United States" for _ in range(1, length=8)],
-    NY_GNP_PCAP_CD=[31270.0, 30270.0, 29040.0, 27650.0, 26390.0, 25680.0, 24270.0, 24060.0],
-    year=[ 1997.0, 1996.0, 1995.0, 1994.0, 1993.0, 1992.0, 1991.0, 1990.0])
-
-# │ Row │ iso2c │ country       │ NY_GNP_PCAP_CD │ year   │
-# ├─────┼───────┼───────────────┼────────────────┼────────┤
-# │ 1   │ US    │ United States │ 31390.0        │ 1997.0 │
-# │ 2   │ US    │ United States │ 30380.0        │ 1996.0 │
-# │ 3   │ US    │ United States │ 29150.0        │ 1995.0 │
-# │ 4   │ US    │ United States │ 27750.0        │ 1994.0 │
-# │ 5   │ US    │ United States │ 26480.0        │ 1993.0 │
-# │ 6   │ US    │ United States │ 25780.0        │ 1992.0 │
-# │ 7   │ US    │ United States │ 24370.0        │ 1991.0 │
-# │ 8   │ US    │ United States │ 24150.0        │ 1990.0 │
+    year=[ 1990.0, 1991.0, 1992.0, 1993.0, 1994.0, 1995.0, 1996.0, 1997.0],
+    NY_GNP_PCAP_CD=[24060.0, 24270.0, 25680.0, 26390.0, 27650.0, 29040.0, 30270.0, 31270.0])
 
 testjson = JSON.parse(testjsonstr)[2]
 
-df = WorldBankData.parse_wdi("NY.GNP.PCAP.CD", testjson, 1990, 1997)
+df = WorldBankData.parse_wdi(["NY.GNP.PCAP.CD"], testjson, 1990, 1997, false)
 
+@test df[!,:year] == dfref[!,:year]
+@test sort(names(df)) == sort(names(dfref))
 @test df == dfref
+

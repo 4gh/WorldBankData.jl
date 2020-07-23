@@ -12,4 +12,6 @@ using SafeTestsets
 
 # example_dl.jl downloads data from the world bank web site.
 # The data gets revised occasionally which breaks the test.
-@time @safetestset "example download" begin include("example_dl.jl") end
+@time @safetestset "example download wide format" begin include("example_dl.jl") end
+@time @safetestset "example download long format" begin include("example_dl_long.jl") end
+

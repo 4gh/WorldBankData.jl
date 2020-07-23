@@ -34,16 +34,9 @@ function try_download(cntr=5)
     dfweb
 end
 
-# data contains NA which breaks == check
-function rm_na(df)
-    df[map(ismissing, df[!, :NY_GNP_PCAP_CD]), :NY_GNP_PCAP_CD] .= -123456
-    df[map(ismissing, df[!, :AG_LND_ARBL_HA_PC]), :AG_LND_ARBL_HA_PC] .= -123456
-end
-
 dfweb = try_download()
 
 @test dfweb[!,:year] == refdf[!,:year]
+@test sort(names(dfweb)) == sort(names(refdf))
+@test dfweb == select!(refdf, names(dfweb))
 
-rm_na(dfweb)
-rm_na(refdf)
-@test dfweb == refdf
