@@ -66,7 +66,7 @@ ISO 3 letter country codes are also supported:
 df = wdi("SP.POP.TOTL", "USA", 1980, 2012)
 ```
 
-Multiple indicators and can be requested:
+Multiple indicators and countries can be requested:
 ```julia
 julia> df = wdi(["SP.POP.TOTL", "NY.GDP.MKTP.CD"], ["US","BR"], 1980, 2012)
 66×5 DataFrame
