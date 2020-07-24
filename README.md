@@ -112,7 +112,7 @@ function wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,
 ```
 
 It needs a minimum of two arguments: the `indicators` (from the WDI
-database) and the `countries` (ISO two or three letter country codes or `all` for all countries). The rest
+database) and the `countries` (ISO two or three letter country codes or `"all"` for all countries). The rest
 are optional arguments.
 
 `startyear`: First year to include.
