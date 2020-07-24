@@ -112,7 +112,7 @@ function wdi(indicators::Union{String,Array{String,1}}, countries::Union{String,
 ```
 
 It needs a minimum of two arguments: the `indicators` (from the WDI
-database) and the `countries` (ISO two or three letter country codes). The rest
+database) and the `countries` (ISO two or three letter country codes or `all` for all countries). The rest
 are optional arguments.
 
 `startyear`: First year to include.
@@ -123,7 +123,7 @@ are optional arguments.
 
 `sourceid`: Database source number, see https://api.worldbank.org/v2/sources
 
-`dflong`: Return long DataFrame format. Default is wide. If many indicators are requested `long` might be preferable.
+`dflong`: If `dflong=true` return long DataFrame format. Default is wide. If many indicators are requested `long` might be preferable.
 
 `verbose`: If `verbose=true`, `wdi()` will print URL download information.
 
