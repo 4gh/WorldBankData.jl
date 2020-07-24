@@ -82,7 +82,7 @@ julia> df = wdi(["SP.POP.TOTL", "NY.GDP.MKTP.CD"], ["US","BR"], 1980, 2012)
 
 By default a wide DataFrame is returned (indicators are columns). The data can also be returned in long format which might be more useful if many indicators are requested:
 ```julia
-ulia> df = wdi(["SP.POP.TOTL", "NY.GDP.MKTP.CD"], ["US","BR"], 1980, 2012, dflong=true)
+julia> df = wdi(["SP.POP.TOTL", "NY.GDP.MKTP.CD"], ["US","BR"], 1980, 2012, dflong=true)
 132×5 DataFrame
 │ Row │ iso2c  │ country       │ year    │ indicator      │ value      │
 │     │ String │ String        │ Float64 │ String         │ Float64?   │
