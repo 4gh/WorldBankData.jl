@@ -8,8 +8,8 @@ testjsonstr = "[{\"page\":1,\"pages\":1,\"per_page\":50,\"total\":8,\"sourceid\"
 
 dfref = DataFrame(iso2c=["US" for _ in range(1, length=8)],
     country=["United States" for _ in range(1, length=8)],
-    year=[ 1990.0, 1991.0, 1992.0, 1993.0, 1994.0, 1995.0, 1996.0, 1997.0],
-    NY_GNP_PCAP_CD=[24060.0, 24270.0, 25680.0, 26390.0, 27650.0, 29040.0, 30270.0, 31270.0])
+    year=[ 1997.0, 1996.0, 1995.0, 1994.0, 1993.0, 1992.0, 1991.0, 1990.0],
+    NY_GNP_PCAP_CD=[31270.0, 30270.0, 29040.0, 27650.0, 26390.0, 25680.0, 24270.0, 24060.0])
 
 testjson = JSON.parse(testjsonstr)[2]
 
