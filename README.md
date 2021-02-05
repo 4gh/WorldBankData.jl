@@ -92,7 +92,7 @@ julia> df = wdi(["SP.POP.TOTL", "NY.GDP.MKTP.CD"], ["US","BR"], 1980, 2012, dflo
 │ 132 │ US     │ United States │ 2012.0  │ NY.GDP.MKTP.CD │ 1.6197e13  │
 ```
 
-Get a DataFrame of the total population for all countries in 2000:
+Get a DataFrame of the total population for all countries from 1980 to 2012:
 
 ```julia
 using WorldBankData
