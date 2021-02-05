@@ -281,7 +281,6 @@ Install the [StatsPlots.jl](https://github.com/JuliaPlots/StatsPlots.jl) package
 ```julia
 using WorldBankData
 using StatsPlots
-gr(size=(400,300))
 
 df = wdi("SP.POP.TOTL", "US", 1980, 2010)
 
