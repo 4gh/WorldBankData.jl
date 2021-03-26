@@ -10,7 +10,8 @@ WorldBankData.reset_indicator_cache()
 
 refdf = DataFrame(CSV.File(joinpath(dirname(@__FILE__), "example_data.csv")))
 
-# the data gets frequently updated on the World Bank site use this to update the example_data.csv file
+# the data gets frequently updated on the World Bank site
+# use this function to update the example_data.csv file
 function update_example_data()
     dfnref = wdi(["NY.GNP.PCAP.CD", "AG.LND.ARBL.HA.PC"], ["US", "BR"], 1980, 2008, extra=true, verbose=true)
     CSV.write(joinpath(dirname(@__FILE__), "example_data.csv"), dfnref)
