@@ -1,3 +1,5 @@
+module TestIndicators
+
 using Test
 using WorldBankData
 
@@ -49,17 +51,24 @@ indicator_data = Any[
 
 df_indicator = WorldBankData.parse_indicator(indicator_data)
 
-@test df_indicator[!, :indicator] == String[
-    "12.1_TD.LOSSES",
-    "13.1_INDUSTRY.ENERGY.INTENSITY",
-    "14.1_AGR.ENERGY.INTENSITY",
-    "15.1_OTHER.SECT.ENER.INTENS",
-    "16.1_DECOMP.EFFICIENCY.IND",
-]
-@test df_indicator[!, :name] == String[
-    "Transmission and distribution losses (%)",
-    "Energy intensity of industrial sector (MJ/\$2005)",
-    "Energy intensity of agricultural sector (MJ/\$2005)",
-    "Energy intensity of other sectors (MJ/\$2005)",
-    "Divisia Decomposition Analysis - Energy Intensity component Index",
-]
+@testset "indicators" begin
+
+    @test df_indicator[!, :indicator] == String[
+        "12.1_TD.LOSSES",
+        "13.1_INDUSTRY.ENERGY.INTENSITY",
+        "14.1_AGR.ENERGY.INTENSITY",
+        "15.1_OTHER.SECT.ENER.INTENS",
+        "16.1_DECOMP.EFFICIENCY.IND",
+    ]
+
+    @test df_indicator[!, :name] == String[
+        "Transmission and distribution losses (%)",
+        "Energy intensity of industrial sector (MJ/\$2005)",
+        "Energy intensity of agricultural sector (MJ/\$2005)",
+        "Energy intensity of other sectors (MJ/\$2005)",
+        "Divisia Decomposition Analysis - Energy Intensity component Index",
+    ]
+
+end
+
+end

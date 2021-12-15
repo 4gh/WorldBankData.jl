@@ -1,3 +1,5 @@
+module TestExampleDownloadLong
+
 using CSV
 using Test
 using WorldBankData
@@ -14,8 +16,8 @@ refdf = stack(refdf, [:NY_GNP_PCAP_CD, :AG_LND_ARBL_HA_PC])
 refdf[!, :variable] = map(x -> replace(String(x), "_" => "."), refdf[!, :variable])
 rename!(refdf, Dict(:variable => :indicator))
 
-# download example case from documentation and compare to csv file
-# retry 5 times if no data
+
+"""Download data. Retry up to 5 times in case of failure."""
 function try_download(cntr = 5)
     dfweb = ""
     while cntr > 0
@@ -39,6 +41,12 @@ function try_download(cntr = 5)
     dfweb
 end
 
-dfweb = try_download()
+@testset "example download (long format)" begin
 
-@test sort!(dfweb) == sort!(refdf)
+    dfweb = try_download()
+
+    @test sort!(dfweb) == sort!(refdf)
+
+end
+
+end

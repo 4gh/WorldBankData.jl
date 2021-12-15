@@ -1,3 +1,5 @@
+module TestCountries
+
 using Test
 using WorldBankData
 
@@ -69,6 +71,12 @@ country_data = Any[
 
 df_country = WorldBankData.parse_country(country_data)
 
-@test df_country[!, :name] ==
-      String["Andorra", "Arab World", "United Arab Emirates", "Argentina"]
-@test df_country[!, :iso2c] == String["AD", "1A", "AE", "AR"]
+@testset "parse country" begin
+
+    @test df_country[!, :name] ==
+          String["Andorra", "Arab World", "United Arab Emirates", "Argentina"]
+    @test df_country[!, :iso2c] == String["AD", "1A", "AE", "AR"]
+
+end
+
+end

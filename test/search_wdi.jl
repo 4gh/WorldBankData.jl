@@ -1,3 +1,5 @@
+module TestSearchWDI
+
 using Test
 using WorldBankData
 
@@ -117,18 +119,28 @@ indicator_data = Any[
 
 df_indicator = WorldBankData.parse_indicator(indicator_data)
 
-WorldBankData.set_country_cache(df_country)
+@testset "search wdi" begin
 
-@test search_wdi("countries", "name", r"(Andorr|Arg)"i)[!, :capital] ==
-      String["Andorra la Vella", "Buenos Aires"]
-@test search_wdi("countries", "capital", r"(Andorr|Abu)"i)[!, :iso2c] == String["AD", "AE"]
+    WorldBankData.set_country_cache(df_country)
 
-WorldBankData.set_indicator_cache(df_indicator)
+    @test search_wdi("countries", "name", r"(Andorr|Arg)"i)[!, :capital] ==
+          String["Andorra la Vella", "Buenos Aires"]
 
-@test search_wdi("indicators", "description", r"energy intensity of"i)[!, :name] == String[
-    "Energy intensity of industrial sector (MJ/\$2005)",
-    "Energy intensity of agricultural sector (MJ/\$2005)",
-    "Energy intensity of other sectors (MJ/\$2005)",
-]
-@test search_wdi("indicators", "description", r"transmiss"i)[!, :indicator] ==
-      String["12.1_TD.LOSSES"]
+    @test search_wdi("countries", "capital", r"(Andorr|Abu)"i)[!, :iso2c] ==
+          String["AD", "AE"]
+
+    WorldBankData.set_indicator_cache(df_indicator)
+
+    @test search_wdi("indicators", "description", r"energy intensity of"i)[!, :name] ==
+          String[
+        "Energy intensity of industrial sector (MJ/\$2005)",
+        "Energy intensity of agricultural sector (MJ/\$2005)",
+        "Energy intensity of other sectors (MJ/\$2005)",
+    ]
+
+    @test search_wdi("indicators", "description", r"transmiss"i)[!, :indicator] ==
+          String["12.1_TD.LOSSES"]
+
+end
+
+end

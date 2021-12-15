@@ -1,3 +1,5 @@
+module TestJSONWDI
+
 using Test
 using WorldBankData
 using DataFrames
@@ -24,8 +26,14 @@ dfref = DataFrame(
 
 testjson = JSON.parse(testjsonstr)[2]
 
-df = WorldBankData.parse_wdi(["NY.GNP.PCAP.CD"], testjson, 1990, 1997, false)
+@testset "parse JSON WDI" begin
 
-@test df[!, :year] == dfref[!, :year]
-@test sort(names(df)) == sort(names(dfref))
-@test df == dfref
+    df = WorldBankData.parse_wdi(["NY.GNP.PCAP.CD"], testjson, 1990, 1997, false)
+
+    @test df[!, :year] == dfref[!, :year]
+    @test sort(names(df)) == sort(names(dfref))
+    @test df == dfref
+
+end
+
+end

@@ -1,3 +1,5 @@
+module TestCheckAllCountries
+
 using Test
 using WorldBankData
 
@@ -304,4 +306,10 @@ all_iso3c = [
     "ZWE",
 ]
 
-@test WorldBankData.download_countries(verbose = true)[!, :iso3c] == all_iso3c
+@testset "check all_countries status" begin
+
+    @test WorldBankData.download_countries(verbose = true)[!, :iso3c] == all_iso3c
+
+end
+
+end

@@ -1,3 +1,8 @@
+module TestExampleDownload
+
+# example_dl.jl downloads data from the world bank web site.
+# The data gets revised occasionally which breaks the test.
+
 using CSV
 using Test
 using WorldBankData
@@ -10,8 +15,7 @@ WorldBankData.reset_indicator_cache()
 
 refdf = DataFrame(CSV.File(joinpath(dirname(@__FILE__), "example_data.csv")))
 
-# the data gets frequently updated on the World Bank site
-# use this function to update the example_data.csv file
+"""Update example_data.csv file. Te data gets frequently updated on the World Bank site."""
 function update_example_data()
     dfnref = wdi(
         ["NY.GNP.PCAP.CD", "AG.LND.ARBL.HA.PC"],
@@ -24,8 +28,7 @@ function update_example_data()
     CSV.write(joinpath(dirname(@__FILE__), "example_data.csv"), dfnref)
 end
 
-# download example case from documentation and compare to csv file
-# retry 5 times if no data
+"""Download data. Retry up to 5 times in case of failure."""
 function try_download(cntr = 5)
     dfweb = ""
     while cntr > 0
@@ -49,8 +52,14 @@ function try_download(cntr = 5)
     dfweb
 end
 
-dfweb = try_download()
+@testset "example download (wide format)" begin
 
-@test dfweb[!, :year] == refdf[!, :year]
-@test sort(names(dfweb)) == sort(names(refdf))
-@test dfweb == select!(refdf, names(dfweb))
+    dfweb = try_download()
+
+    @test dfweb[!, :year] == refdf[!, :year]
+    @test sort(names(dfweb)) == sort(names(refdf))
+    @test dfweb == select!(refdf, names(dfweb))
+
+end
+
+end

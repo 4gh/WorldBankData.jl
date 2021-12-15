@@ -1,12 +1,14 @@
+module TestIsFormatted
+
 using Test
-using WorldBankData
 using FilePathsBase
 using JuliaFormatter
 
-# find_jl_files returns a vector of filenames of julia source code files.
+
+"""find_jl_files returns a vector of filenames of julia source code files."""
 function find_jl_files()
     jlfiles = String[]
-    for (root, dirs, files) in walkdir("..") # .. since Pkg.test() runs in ./test directory
+    for (root, dirs, files) in walkdir("..") # use .. since Pkg.test() runs in ./test directory
         for f in files
             if endswith(f, ".jl")
                 push!(jlfiles, joinpath(root, f))
@@ -16,11 +18,12 @@ function find_jl_files()
     return jlfiles
 end
 
-# is_formatted returns true if all .jl files in the repository are formatted according to JuliaFormatter.
+
+"""is_formatted returns true if all .jl files in the repository are formatted according to JuliaFormatter."""
 function is_formatted()
     jlfiles = find_jl_files()
     for f in jlfiles
-        println("[INFO] check formatting of file $f.")
+        println("Check formatting of file $f.")
         str = String(read(f))
         if str != format_text(str)
             println("[WARN] file $f is not formatted correctly.")
@@ -30,4 +33,8 @@ function is_formatted()
     return true
 end
 
-@test is_formatted()
+@testset "code is formatted" begin
+    @test is_formatted()
+end
+
+end
