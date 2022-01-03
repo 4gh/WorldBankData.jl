@@ -15,28 +15,15 @@ WorldBankData.reset_indicator_cache()
 
 refdf = DataFrame(CSV.File(joinpath(dirname(@__FILE__), "example_data.csv")))
 
-"""Update example_data.csv file. Te data gets frequently updated on the World Bank site."""
-function update_example_data()
-    dfnref = wdi(
-        ["NY.GNP.PCAP.CD", "AG.LND.ARBL.HA.PC"],
-        ["US", "BR"],
-        1980,
-        2008,
-        extra = true,
-        verbose = true,
-    )
-    CSV.write(joinpath(dirname(@__FILE__), "example_data.csv"), dfnref)
-end
-
 """Download data. Retry up to 5 times in case of failure."""
 function try_download(cntr = 5)
     dfweb = ""
     while cntr > 0
         dfweb = wdi(
-            ["NY.GNP.PCAP.CD", "AG.LND.ARBL.HA.PC"],
+            ["AG.SRF.TOTL.K2", "AG.LND.FRST.K2"],
             ["US", "BR"],
-            1980,
-            2008,
+            1990,
+            2010,
             extra = true,
             verbose = true,
         )
