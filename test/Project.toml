@@ -7,8 +7,8 @@ JuliaFormatter = "98e50ef6-434e-11e9-1051-2b60c6c9e899"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
-CSV = "^0.9"
+CSV = "^0.10"
 DataFrames = "^1.3"
 FilePathsBase = "^0.9"
 JSON = "^0.21"
-JuliaFormatter = "^0.20"
+JuliaFormatter = "^1.0"
