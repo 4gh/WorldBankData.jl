@@ -12,7 +12,7 @@ WorldBankData.reset_indicator_cache()
 
 refdf = DataFrame(CSV.File(joinpath(dirname(@__FILE__), "example_data.csv")))
 refdf = select!(refdf, [:iso2c, :country, :AG_SRF_TOTL_K2, :year, :AG_LND_FRST_K2])
-refdf = stack(refdf, [:AG_SRF_TOTL_K2, :AG_LND_FRST_K2])
+refdf = DataFrames.stack(refdf, [:AG_SRF_TOTL_K2, :AG_LND_FRST_K2])
 refdf[!, :variable] = map(x -> replace(String(x), "_" => "."), refdf[!, :variable])
 rename!(refdf, Dict(:variable => :indicator))
 
