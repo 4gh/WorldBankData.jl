@@ -3,8 +3,7 @@ module TestCheckAllCountries
 using Test
 using WorldBankData
 
-# checks the iso 3-letter country codes for updates
-all_iso3c = [
+example_iso3c = [
     "ABW",
     "AFE",
     "AFG",
@@ -76,12 +75,10 @@ all_iso3c = [
     "DEA",
     "DEC",
     "DEU",
-    "DFS",
     "DJI",
     "DLA",
     "DMA",
     "DMN",
-    "DNF",
     "DNK",
     "DNS",
     "DOM",
@@ -306,9 +303,10 @@ all_iso3c = [
     "ZWE",
 ]
 
-@testset "check all_countries status" begin
+@testset "check all_countries matches" begin
 
-    @test WorldBankData.download_countries(verbose = true)[!, :iso3c] == all_iso3c
+    data_iso3c = WorldBankData.download_countries(verbose = true)[!, :iso3c]
+    @test example_iso3c == data_iso3c
 
 end
 
